@@ -1,0 +1,40 @@
+
+{
+  "success": true,
+  "message": "HTTP zahtev je uspešno izvršen!",
+  "protocol": "HTTP",
+  "method": "GET",
+  "resource": "data/example.json",
+  "contentType": "application/json",
+  "presentation": {
+    "title": "HTTP protokol",
+    "description": "Interaktivna edukativna prezentacija o HTTP komunikaciji",
+    "totalTopics": 10,
+    "version": "1.0"
+  },
+  "exampleUser": {
+    "id": 1,
+    "name": "Ana",
+    "role": "student",
+    "active": true
+  },
+  "httpConcepts": [
+    {
+      "name": "Request",
+      "description": "Zahtev koji klijent šalje serveru."
+    },
+    {
+      "name": "Response",
+      "description": "Odgovor koji server vraća klijentu."
+    },
+    {
+      "name": "GET",
+      "description": "HTTP metoda za preuzimanje resursa."
+    },
+    {
+      "name": "HTTPS",
+      "description": "HTTP komunikacija zaštićena TLS protokolom."
+    }
+  ],
+  "conclusion": "HTTP omogućava razmenu informacija između web klijenata i servera."
+}

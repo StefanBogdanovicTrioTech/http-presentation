@@ -1,0 +1,1395 @@
+
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#08090c">
+  <meta name="description" content="Šta je HTTP protokol? Interaktivno objašnjenje HTTP-a, HTML-a, browsera i URL adresa.">
+
+  <title>Šta je HTTP? | HTTP Protokol</title>
+  <link rel="icon" type="image/png" href="./slike/ikonica.png">
+  
+
+  <link rel="stylesheet" href="style.css">
+
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* ==========================================
+       ŠTA JE HTTP — DIZAJN STRANICE
+       ========================================== */
+
+    .what-hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 65px;
+      align-items: center;
+      min-height: 430px;
+    }
+
+    .what-heading {
+      font-size: clamp(2.8rem, 4.9vw, 5rem);
+      font-weight: 900;
+      line-height: 1.12;
+      letter-spacing: -2px;
+      margin: 20px 0 24px;
+    }
+
+    .what-lead {
+      font-size: 1.13rem;
+      color: var(--muted);
+      max-width: 550px;
+      line-height: 1.85;
+    }
+
+    .what-lead strong {
+      color: var(--white);
+    }
+
+    .what-definition {
+      margin-top: 27px;
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 11px;
+      align-items: center;
+      padding: 13px 19px;
+      border-radius: 13px;
+      background: rgba(255,121,0,0.075);
+      border: 1px solid rgba(255,171,49,0.24);
+    }
+
+    .what-definition strong {
+      color: var(--orange-light);
+      font-size: 1.08rem;
+    }
+
+    .what-definition span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    /* ==========================================
+       HERO — KLIJENT I SERVER
+       ========================================== */
+
+    .network-visual {
+      position: relative;
+      min-height: 350px;
+      display: grid;
+      place-items: center;
+      isolation: isolate;
+    }
+
+    .network-visual::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      width: 95%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        rgba(255,121,0,0.19),
+        rgba(255,155,0,0.035) 48%,
+        transparent 70%
+      );
+      filter: blur(12px);
+    }
+
+    .network-orbit {
+      position: absolute;
+      width: 94%;
+      height: 79%;
+      border: 1px solid rgba(255,165,35,0.21);
+      border-radius: 50%;
+      transform: rotate(-21deg);
+      pointer-events: none;
+    }
+
+    .network-orbit::before {
+      content: "";
+      position: absolute;
+      inset: 28px;
+      border: 1px dashed rgba(255,171,49,0.13);
+      border-radius: 50%;
+    }
+
+    .network-layout {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0,1fr) 105px minmax(0,1fr);
+      gap: 10px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .network-device {
+      min-width: 0;
+      padding: 25px 15px;
+      min-height: 205px;
+      border-radius: 23px;
+      background:
+        radial-gradient(circle at 30% 0%, rgba(255,170,40,0.09), transparent 65%),
+        rgba(18,20,26,0.84);
+      border: 1px solid rgba(255,177,65,0.32);
+      box-shadow:
+        0 25px 55px rgba(0,0,0,0.34),
+        inset 0 1px 0 rgba(255,255,255,0.11),
+        0 0 30px rgba(255,121,0,0.07);
+      backdrop-filter: blur(20px);
+      text-align: center;
+    }
+
+    .network-device svg {
+      display: block;
+      width: 85px;
+      height: 85px;
+      margin: 0 auto 17px;
+      fill: none;
+      stroke: var(--orange-light);
+      stroke-width: 1.65;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 0 15px rgba(255,121,0,0.24));
+    }
+
+    .network-device strong {
+      display: block;
+      font-size: 1.05rem;
+    }
+
+    .network-device small {
+      display: block;
+      color: var(--muted);
+      margin-top: 4px;
+      font-size: 0.77rem;
+    }
+
+    .network-transfer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .transfer-label {
+      color: var(--orange-light);
+      font-family: Consolas, monospace;
+      font-size: 0.78rem;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .transfer-arrow {
+      position: relative;
+      width: 100%;
+      height: 3px;
+      border-radius: 10px;
+      background: var(--gradient);
+      box-shadow: 0 0 16px rgba(255,121,0,0.45);
+    }
+
+    .transfer-arrow::before {
+      content: "";
+      position: absolute;
+      top: -4px;
+      right: 0;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 10px solid var(--orange-light);
+    }
+
+    .transfer-arrow::after {
+      content: "";
+      position: absolute;
+      top: -4px;
+      left: 0;
+      width: 11px;
+      height: 11px;
+      background: #ffe3a0;
+      border-radius: 50%;
+      box-shadow: 0 0 15px var(--orange);
+      animation: packet-move 2.5s linear infinite;
+    }
+
+    .transfer-arrow.back {
+      transform: rotate(180deg);
+    }
+
+    .transfer-arrow.back::after {
+      animation-delay: 1.25s;
+    }
+
+    @keyframes packet-move {
+      from {
+        left: 0;
+        opacity: 0;
+      }
+      15% {
+        opacity: 1;
+      }
+      85% {
+        opacity: 1;
+      }
+      to {
+        left: calc(100% - 11px);
+        opacity: 0;
+      }
+    }
+
+    .network-label {
+      position: absolute;
+      bottom: -34px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 18px;
+      border-radius: 99px;
+      border: 1px solid var(--glass-border);
+      background: rgba(10,11,15,0.92);
+      color: var(--gold-light);
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    /* ==========================================
+       DEFINICIJA
+       ========================================== */
+
+    .definition-section {
+      margin-top: 90px;
+    }
+
+    .definition-box {
+      text-align: center;
+      padding: 43px 35px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .definition-box::before {
+      content: "";
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      left: -190px;
+      top: -220px;
+      background: rgba(255,121,0,0.065);
+      filter: blur(50px);
+      pointer-events: none;
+    }
+
+    .definition-box h2 {
+      font-size: clamp(1.9rem,3vw,2.8rem);
+      line-height: 1.24;
+      margin: 15px auto;
+    }
+
+    .definition-box p {
+      max-width: 850px;
+      margin: auto;
+      color: var(--muted);
+      font-size: 1.08rem;
+      line-height: 1.9;
+    }
+
+    .definition-box strong {
+      color: var(--white);
+    }
+
+    /* ==========================================
+       HTTP / HTML / BROWSER
+       ========================================== */
+
+    .roles-section {
+      margin-top: 85px;
+    }
+
+    .section-heading {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .section-heading h2 {
+      margin: 13px 0;
+      font-size: clamp(1.9rem,3.4vw,2.8rem);
+      line-height: 1.25;
+    }
+
+    .section-heading p {
+      max-width: 720px;
+      margin: auto;
+      color: var(--muted);
+    }
+
+    .role-card {
+      text-align: center;
+      min-height: 265px;
+    }
+
+    .role-symbol {
+      display: grid;
+      place-items: center;
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 19px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,172,50,0.24);
+      background: linear-gradient(
+        140deg,
+        rgba(255,121,0,0.17),
+        rgba(255,200,0,0.025)
+      );
+      color: var(--orange-light);
+      font-family: Consolas,monospace;
+      font-size: 1.25rem;
+      font-weight: 800;
+      box-shadow: 0 0 25px rgba(255,121,0,0.09);
+    }
+
+    .role-symbol svg {
+      width: 39px;
+      height: 39px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .role-card h3 {
+      font-size: 1.28rem;
+      margin-bottom: 9px;
+    }
+
+    .role-card p {
+      font-size: 0.94rem;
+      line-height: 1.8;
+    }
+
+    /* ==========================================
+       INTERAKTIVNA DEMONSTRACIJA
+       ========================================== */
+
+    .concept-section {
+      margin-top: 90px;
+    }
+
+    .concept-demo {
+      padding: 30px;
+    }
+
+    .concept-tabs {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 26px;
+    }
+
+    .concept-tab {
+      flex: 1;
+      min-width: 150px;
+      padding: 14px 18px;
+      border-radius: 14px;
+      color: var(--muted);
+      font-weight: 750;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.12);
+      transition: all 0.25s ease;
+    }
+
+    .concept-tab:hover {
+      border-color: var(--orange-light);
+      color: var(--white);
+    }
+
+    .concept-tab.active {
+      background: var(--gradient);
+      border-color: var(--orange-light);
+      color: #15110a;
+      box-shadow: 0 5px 20px rgba(255,121,0,0.15);
+    }
+
+    .concept-layout {
+      display: grid;
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: 28px;
+      align-items: stretch;
+    }
+
+    .concept-info {
+      padding: 14px 5px;
+    }
+
+    .concept-step-number {
+      color: var(--orange-light);
+      font-weight: 800;
+      letter-spacing: 2px;
+      font-size: 0.78rem;
+    }
+
+    .concept-info h3 {
+      margin: 12px 0;
+      font-size: clamp(1.4rem,2.4vw,2rem);
+      line-height: 1.3;
+    }
+
+    .concept-info p {
+      color: var(--muted);
+      line-height: 1.85;
+    }
+
+    .concept-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 23px;
+      padding: 9px 15px;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255,121,0,0.065);
+      color: var(--orange-light);
+      font-size: 0.83rem;
+      font-weight: 650;
+    }
+
+    .concept-display {
+      border: 1px solid rgba(255,174,56,0.21);
+      background: #0b0d12;
+      border-radius: 18px;
+      overflow: hidden;
+      min-height: 300px;
+    }
+
+    .concept-display-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      min-height: 45px;
+      padding: 11px 17px;
+      background: rgba(255,255,255,0.055);
+      border-bottom: 1px solid rgba(255,255,255,0.09);
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-family: Consolas,monospace;
+    }
+
+    .concept-indicator {
+      width: 8px;
+      height: 8px;
+      flex: 0 0 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 11px var(--success);
+    }
+
+    .concept-code {
+      margin: 0;
+      padding: 27px 22px;
+      color: #f3d29c;
+      font-size: clamp(0.78rem,1.2vw,0.96rem);
+      line-height: 1.95;
+      font-family: Consolas,"Courier New",monospace;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    /* ==========================================
+       HTML PREGLED
+       ========================================== */
+
+    .rendered-preview {
+      padding: 24px;
+    }
+
+    .preview-window {
+      background: #f5f6fa;
+      color: #1d2330;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.25);
+    }
+
+    .preview-top {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 12px 15px;
+      background: #e6e8ee;
+    }
+
+    .preview-top span {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #bbc1cb;
+    }
+
+    .preview-url {
+      flex: 1;
+      margin-left: 10px;
+      background: white;
+      border-radius: 5px;
+      padding: 5px 12px;
+      color: #69717e;
+      font-size: 0.75rem;
+    }
+
+    .preview-content {
+      padding: 32px 25px 38px;
+      text-align: center;
+    }
+
+    .preview-content h3 {
+      color: #242833;
+      font-size: 1.65rem;
+      margin-bottom: 8px;
+    }
+
+    .preview-content p {
+      color: #666e7a;
+      font-size: 0.92rem;
+    }
+
+    .preview-content .preview-button {
+      display: inline-block;
+      margin-top: 21px;
+      padding: 10px 24px;
+      border-radius: 9px;
+      background: #f18b15;
+      color: #16110c;
+      font-size: 0.85rem;
+      font-weight: 800;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    /* ==========================================
+       INTERAKTIVNA URL ADRESA
+       ========================================== */
+
+    .url-section {
+      margin-top: 90px;
+    }
+
+    .url-panel {
+      padding: 35px;
+    }
+
+    .url-address {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      padding: 22px 15px;
+      margin: 25px 0;
+      background: #0a0b0f;
+      border: 1px solid rgba(255,255,255,0.095);
+      border-radius: 15px;
+      font-family: Consolas,"Courier New",monospace;
+    }
+
+    .url-segment {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      border-radius: 3px;
+      padding: 7px 2px;
+      color: var(--orange-light);
+      font-size: clamp(0.85rem,1.7vw,1.22rem);
+      font-weight: 750;
+      transition: all 0.2s ease;
+    }
+
+    .url-segment:nth-child(2) {
+      color: var(--gold-light);
+    }
+
+    .url-segment:nth-child(3) {
+      color: #f6f4ee;
+    }
+
+    .url-segment:nth-child(4) {
+      color: #d4a1f6;
+    }
+
+    .url-segment:hover,
+    .url-segment.active {
+      border-bottom-color: currentColor;
+      background: rgba(255,255,255,0.055);
+    }
+
+    .url-explanation {
+      min-height: 110px;
+      padding: 24px;
+      border-radius: 15px;
+      background: rgba(255,121,0,0.045);
+      border: 1px solid rgba(255,171,49,0.17);
+      text-align: center;
+    }
+
+    .url-explanation h3 {
+      margin-bottom: 7px;
+      color: var(--orange-light);
+      font-size: 1.17rem;
+    }
+
+    .url-explanation p {
+      color: var(--muted);
+      max-width: 720px;
+      margin: auto;
+      line-height: 1.75;
+    }
+
+    /* ==========================================
+       ZAKLJUČAK
+       ========================================== */
+
+    .what-summary {
+      margin-top: 90px;
+      text-align: center;
+    }
+
+    .what-summary h2 {
+      margin: 12px 0 25px;
+      font-size: clamp(1.8rem,3.1vw,2.6rem);
+    }
+
+    .takeaway-items {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 13px;
+      margin-top: 20px;
+    }
+
+    .takeaway-items span {
+      padding: 11px 20px;
+      border: 1px solid var(--glass-border);
+      border-radius: 99px;
+      background: rgba(255,121,0,0.06);
+      color: var(--gold-light);
+      font-weight: 750;
+      font-size: 0.91rem;
+    }
+
+    .stateless-note {
+      max-width: 900px;
+      margin: 45px auto 0;
+      padding: 24px 28px;
+      border-left: 3px solid var(--orange);
+      border-radius: 0 15px 15px 0;
+      background: rgba(255,121,0,0.05);
+    }
+
+    .stateless-note strong {
+      color: var(--orange-light);
+    }
+
+    .stateless-note p {
+      margin-top: 7px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    /* ==========================================
+       RESPONSIVE
+       ========================================== */
+
+    @media (max-width: 950px) {
+
+      .what-hero {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        text-align: center;
+      }
+
+      .what-lead {
+        margin-inline: auto;
+      }
+
+      .network-visual {
+        width: min(100%,620px);
+        margin: auto;
+      }
+
+      .concept-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .role-card {
+        min-height: unset;
+      }
+    }
+
+    @media (max-width: 760px) {
+
+      .what-hero {
+        min-height: auto;
+      }
+
+      .definition-section,
+      .roles-section,
+      .concept-section,
+      .url-section,
+      .what-summary {
+        margin-top: 65px;
+      }
+
+      .definition-box,
+      .url-panel,
+      .concept-demo {
+        padding: 22px 17px;
+      }
+
+      .network-layout {
+        grid-template-columns:
+          minmax(0,1fr) 65px minmax(0,1fr);
+        gap: 4px;
+      }
+
+      .network-device {
+        min-height: 170px;
+        padding: 16px 9px;
+      }
+
+      .network-device svg {
+        width: 60px;
+        height: 60px;
+      }
+
+      .network-transfer {
+        gap: 10px;
+      }
+
+      .transfer-label {
+        font-size: 0.60rem;
+      }
+
+      .concept-tabs {
+        flex-direction: column;
+      }
+
+      .concept-tab {
+        min-width: 0;
+      }
+
+      .url-address {
+        padding: 18px 7px;
+      }
+
+      .url-explanation {
+        padding: 20px 13px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .transfer-arrow::after {
+        animation: none;
+      }
+    }
+  </style>
+
+  <!-- Interakcije se nalaze u script.js -->
+  <script src="script.js" defer></script>
+</head>
+
+<body>
+
+  <div id="site-background" aria-hidden="true"></div>
+  <div id="site-header"></div>
+
+  <main class="page-shell lesson-page">
+
+    <!-- =====================================
+         01 — HERO
+         ===================================== -->
+
+    <section class="what-hero"
+             aria-labelledby="what-title">
+
+      <div class="fade-up">
+
+        <span class="section-label">
+          02 / 10 — Osnovni pojmovi
+        </span>
+
+        <h1 class="what-heading" id="what-title">
+          HTTP nije stranica.
+          <span class="gradient-text">
+            HTTP je način komunikacije.
+          </span>
+        </h1>
+
+        <p class="what-lead">
+          Kada otvoriš web sajt, tvoj browser
+          i udaljeni server moraju da komuniciraju.
+
+          <strong>HTTP definiše pravila te komunikacije:</strong>
+          kako klijent traži resurs i kako server
+          vraća odgovor.
+        </p>
+
+        <div class="what-definition">
+          <strong>HTTP</strong>
+          <span>Hypertext Transfer Protocol</span>
+        </div>
+
+      </div>
+
+      <!-- Mrežni dijagram -->
+
+      <div class="network-visual">
+
+        <div class="network-orbit" aria-hidden="true"></div>
+
+        <div class="network-layout">
+
+          <!-- Browser -->
+
+          <div class="network-device">
+
+            <svg viewBox="0 0 100 100"
+                 aria-hidden="true">
+
+              <rect x="9" y="17"
+                    width="82" height="60" rx="8"/>
+
+              <path d="M9 31h82"/>
+
+              <circle cx="19" cy="24" r="2"
+                      fill="currentColor" stroke="none"/>
+
+              <circle cx="27" cy="24" r="2"
+                      fill="currentColor" stroke="none"/>
+
+              <circle cx="35" cy="24" r="2"
+                      fill="currentColor" stroke="none"/>
+
+              <rect x="19" y="42"
+                    width="26" height="25" rx="4"/>
+
+              <path d="M55 45h24M55 54h20M55 63h15"/>
+
+            </svg>
+
+            <strong>Browser</strong>
+            <small>Klijent</small>
+
+          </div>
+
+          <!-- Zahtev i odgovor -->
+
+          <div class="network-transfer"
+               aria-label="HTTP zahtev i odgovor">
+
+            <span class="transfer-label">
+              Request
+            </span>
+
+            <div class="transfer-arrow"
+                 aria-hidden="true"></div>
+
+            <div class="transfer-arrow back"
+                 aria-hidden="true"></div>
+
+            <span class="transfer-label">
+              Response
+            </span>
+
+          </div>
+
+          <!-- Server -->
+
+          <div class="network-device">
+
+            <svg viewBox="0 0 100 100"
+                 aria-hidden="true">
+
+              <rect x="16" y="14"
+                    width="68" height="21" rx="5"/>
+
+              <rect x="16" y="40"
+                    width="68" height="21" rx="5"/>
+
+              <rect x="16" y="66"
+                    width="68" height="21" rx="5"/>
+
+              <path d="M26 24h26M26 50h26M26 76h26"/>
+
+              <circle cx="73" cy="24" r="4"
+                      fill="#ff9c2f" stroke="none"/>
+
+              <circle cx="73" cy="50" r="4"
+                      fill="#ff9c2f" stroke="none"/>
+
+              <circle cx="73" cy="76" r="4"
+                      fill="#ff9c2f" stroke="none"/>
+
+            </svg>
+
+            <strong>Server</strong>
+            <small>Web server</small>
+
+          </div>
+
+        </div>
+
+        <span class="network-label">
+          Request → Response
+        </span>
+
+      </div>
+
+    </section>
+
+    <!-- =====================================
+         02 — DEFINICIJA
+         ===================================== -->
+
+    <section class="definition-section"
+             aria-labelledby="definition-title">
+
+      <div class="glass-card definition-box">
+
+        <span class="section-label">
+          Definicija
+        </span>
+
+        <h2 id="definition-title">
+          Šta je zapravo
+          <span class="gradient-text">HTTP?</span>
+        </h2>
+
+        <p>
+          <strong>HTTP (Hypertext Transfer Protocol)</strong>
+          je protokol aplikacionog sloja namenjen
+          razmeni informacija na webu.
+
+          Zasniva se na modelu
+          <strong>zahtev–odgovor (Request–Response)</strong>:
+          klijent šalje zahtev, a server vraća odgovor
+          koji sadrži rezultat obrade i,
+          po potrebi, tražene podatke.
+
+          HTTP se koristi za prenos HTML dokumenata,
+          slika, video sadržaja, JSON podataka
+          i mnogih drugih resursa.
+        </p>
+
+      </div>
+
+    </section>
+
+    <!-- =====================================
+         03 — HTTP / HTML / BROWSER
+         ===================================== -->
+
+    <section class="roles-section"
+             aria-labelledby="roles-title">
+
+      <div class="section-heading">
+
+        <span class="section-label">
+          Tri važna pojma
+        </span>
+
+        <h2 id="roles-title">
+          HTTP, HTML i Browser
+          <span class="gradient-text">nisu isto.</span>
+        </h2>
+
+        <p>
+          Ova tri pojma često se koriste zajedno,
+          ali imaju potpuno različite uloge.
+        </p>
+
+      </div>
+
+      <div class="lesson-grid three">
+
+        <!-- HTTP -->
+
+        <article class="glass-card role-card">
+
+          <div class="role-symbol">
+            ⇄
+          </div>
+
+          <h3>HTTP</h3>
+
+          <p>
+            Protokol koji definiše način razmene
+            zahteva i odgovora između klijenta
+            i servera.
+          </p>
+
+        </article>
+
+        <!-- HTML -->
+
+        <article class="glass-card role-card">
+
+          <div class="role-symbol">
+            &lt;/&gt;
+          </div>
+
+          <h3>HTML</h3>
+
+          <p>
+            Jezik za označavanje koji definiše
+            strukturu i sadržaj web stranice.
+          </p>
+
+        </article>
+
+        <!-- Browser -->
+
+        <article class="glass-card role-card">
+
+          <div class="role-symbol">
+
+            <svg viewBox="0 0 48 48"
+                 aria-hidden="true">
+
+              <rect x="5" y="9"
+                    width="38" height="30" rx="5"/>
+
+              <path d="M5 18h38"/>
+
+              <circle cx="12" cy="14" r="1.5"/>
+
+              <circle cx="18" cy="14" r="1.5"/>
+
+              <path d="M13 27h22M13 32h15"/>
+
+            </svg>
+
+          </div>
+
+          <h3>Browser</h3>
+
+          <p>
+            Program koji šalje HTTP zahteve,
+            prima resurse i prikazuje
+            web stranice korisniku.
+          </p>
+
+        </article>
+
+      </div>
+
+    </section>
+
+    <!-- =====================================
+         04 — INTERAKTIVNI PRIMER
+         ===================================== -->
+
+    <section class="concept-section"
+             aria-labelledby="concept-title">
+
+      <div class="section-heading">
+
+        <span class="section-label">
+          Interaktivni primer
+        </span>
+
+        <h2 id="concept-title">
+          Od zahteva do
+          <span class="gradient-text">vidljive stranice.</span>
+        </h2>
+
+        <p>
+          Klikni na svaki korak da vidiš razliku
+          između HTTP komunikacije i HTML prikaza.
+        </p>
+
+      </div>
+
+      <div class="glass-card concept-demo">
+
+        <!-- Tri interaktivna dugmeta -->
+
+        <div class="concept-tabs"
+             id="concept-tabs"
+             aria-label="Koraci obrade web stranice">
+
+          <button type="button"
+                  class="concept-tab active"
+                  data-concept="request"
+                  aria-pressed="true">
+            01 — HTTP zahtev
+          </button>
+
+          <button type="button"
+                  class="concept-tab"
+                  data-concept="response"
+                  aria-pressed="false">
+            02 — HTTP odgovor
+          </button>
+
+          <button type="button"
+                  class="concept-tab"
+                  data-concept="render"
+                  aria-pressed="false">
+            03 — HTML prikaz
+          </button>
+
+        </div>
+
+        <div class="concept-layout">
+
+          <!-- Objašnjenje koraka -->
+
+          <div class="concept-info"
+               aria-live="polite">
+
+            <span class="concept-step-number"
+                  id="concept-number">
+              KORAK 01
+            </span>
+
+            <h3 id="concept-heading">
+              Browser traži resurs
+            </h3>
+
+            <p id="concept-description">
+              Browser šalje GET zahtev serveru
+              za HTML dokument koji želi da preuzme.
+            </p>
+
+            <span class="concept-tag"
+                  id="concept-tag">
+              Klijent → Server
+            </span>
+
+          </div>
+
+          <!-- Prikaz HTTP poruke / stranice -->
+
+          <div class="concept-display">
+
+            <div class="concept-display-bar">
+
+              <span id="concept-display-title">
+                HTTP/1.1 Request
+              </span>
+
+              <span class="concept-indicator"
+                    aria-hidden="true"></span>
+
+            </div>
+
+            <!-- Tekst HTTP poruke -->
+
+            <pre class="concept-code"
+                 id="concept-code">GET /index.html HTTP/1.1
+Host: example.com
+Accept: text/html</pre>
+
+            <!-- Vizuelni pregled web stranice -->
+
+            <div class="rendered-preview"
+                 id="concept-preview"
+                 hidden>
+
+              <div class="preview-window">
+
+                <div class="preview-top">
+
+                  <span></span>
+                  <span></span>
+                  <span></span>
+
+                  <div class="preview-url">
+                    example.com
+                  </div>
+
+                </div>
+
+                <div class="preview-content">
+
+                  <h3>Moja web stranica</h3>
+
+                  <p>
+                    Ovaj sadržaj browser je prikazao
+                    na osnovu primljenog HTML dokumenta.
+                  </p>
+
+                  <span class="preview-button">
+                    Dobrodošli!
+                  </span>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =====================================
+         05 — INTERAKTIVNA URL ADRESA
+         ===================================== -->
+
+    <section class="url-section"
+             aria-labelledby="url-title">
+
+      <div class="section-heading">
+
+        <span class="section-label">
+          URL adresa
+        </span>
+
+        <h2 id="url-title">
+          Šta znači svaki deo
+          <span class="gradient-text">web adrese?</span>
+        </h2>
+
+        <p>
+          Klikni na bilo koji deo adrese
+          i saznaj čemu služi.
+        </p>
+
+      </div>
+
+      <div class="glass-card url-panel">
+
+        <div class="url-address"
+             id="url-address"
+             aria-label="Interaktivna URL adresa">
+
+          <!-- Šema -->
+
+          <button type="button"
+                  class="url-segment active"
+                  data-url-part="scheme"
+                  aria-pressed="true">
+            https://
+          </button>
+
+          <!-- Domen -->
+
+          <button type="button"
+                  class="url-segment"
+                  data-url-part="host"
+                  aria-pressed="false">
+            example.com
+          </button>
+
+          <!-- Putanja -->
+
+          <button type="button"
+                  class="url-segment"
+                  data-url-part="path"
+                  aria-pressed="false">
+            /lekcije/http.html
+          </button>
+
+          <!-- Parametri -->
+
+          <button type="button"
+                  class="url-segment"
+                  data-url-part="query"
+                  aria-pressed="false">
+            ?mode=demo
+          </button>
+
+        </div>
+
+        <div class="url-explanation"
+             aria-live="polite">
+
+          <h3 id="url-part-title">
+            Šema / protokol
+          </h3>
+
+          <p id="url-part-description">
+            https označava da se koristi
+            HTTP komunikacija zaštićena TLS-om.
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =====================================
+         06 — STATELESS
+         ===================================== -->
+
+    <aside class="stateless-note">
+
+      <strong>
+        Zanimljivost: HTTP je stateless protokol.
+      </strong>
+
+      <p>
+        To znači da svaki HTTP zahtev može
+        samostalno da se obradi i da protokol
+        ne zahteva pamćenje prethodnih zahteva.
+
+        Sajtovi ipak mogu da održavaju
+        korisničke sesije pomoću kolačića
+        (cookies) i drugih mehanizama.
+      </p>
+
+    </aside>
+
+    <!-- =====================================
+         07 — ZAKLJUČAK
+         ===================================== -->
+
+    <section class="what-summary">
+
+      <div class="glass-card">
+
+        <span class="section-label">
+          Zapamti
+        </span>
+
+        <h2>
+          HTTP definiše
+          <span class="gradient-text">pravila komunikacije.</span>
+        </h2>
+
+        <div class="takeaway-items">
+
+          <span>HTTP = Protokol</span>
+
+          <span>HTML = Struktura sadržaja</span>
+
+          <span>Browser = Klijent</span>
+
+          <span>Server = Obrada zahteva</span>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =====================================
+         NAVIGACIJA
+         ===================================== -->
+
+    <div id="lesson-navigation"></div>
+
+  </main>
+
+  <div id="site-footer"></div>
+
+</body>
+</html>

@@ -1,0 +1,2071 @@
+
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#08090c">
+
+  <meta name="description"
+        content="HTTP u praksi: stvarni GET zahtev pomoću JavaScript fetch API-ja, pregled odgovora i Developer Tools Network kartice.">
+
+  <title>HTTP u praksi | HTTP Protokol</title>
+  <link rel="icon" type="image/png" href="./slike/ikonica.png">
+  
+
+  <link rel="stylesheet" href="style.css">
+
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+
+    /* =====================================
+       01 — UVODNA SEKCIJA
+       ===================================== */
+
+    .practice-hero {
+      display: grid;
+      grid-template-columns: 1fr 0.95fr;
+      gap: 55px;
+      align-items: center;
+      min-height: 390px;
+      margin-bottom: 78px;
+    }
+
+    .practice-hero h1 {
+      margin: 17px 0 22px;
+      font-size: clamp(2.8rem, 4.8vw, 5rem);
+      line-height: 1.12;
+      letter-spacing: -2px;
+      font-weight: 900;
+    }
+
+    .practice-hero p {
+      max-width: 560px;
+      color: var(--muted);
+      font-size: 1.08rem;
+      line-height: 1.85;
+    }
+
+    .practice-hero strong {
+      color: var(--white);
+    }
+
+    .live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 24px;
+      padding: 9px 16px;
+      border-radius: 99px;
+      background: rgba(57,217,138,0.075);
+      border: 1px solid rgba(57,217,138,0.24);
+      color: var(--success);
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .live-indicator::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 12px rgba(57,217,138,0.7);
+      animation: pulse 2s infinite;
+    }
+
+    /* =====================================
+       02 — HERO CODE WINDOW
+       ===================================== */
+
+    .hero-code-wrap {
+      position: relative;
+      isolation: isolate;
+    }
+
+    .hero-code-wrap::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      width: 110%;
+      aspect-ratio: 1;
+      left: -5%;
+      top: -30%;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        rgba(255,121,0,0.17),
+        rgba(255,121,0,0.035) 43%,
+        transparent 70%
+      );
+      filter: blur(20px);
+      pointer-events: none;
+    }
+
+    .hero-code-window {
+      overflow: hidden;
+      border-radius: 23px;
+      border: 1px solid rgba(255,173,47,0.35);
+      background: #0a0c11;
+      box-shadow:
+        0 25px 60px rgba(0,0,0,0.36),
+        0 0 45px rgba(255,121,0,0.10);
+      transform: rotate(-2deg);
+      transition: transform 0.35s;
+    }
+
+    .hero-code-window:hover {
+      transform: rotate(0deg);
+    }
+
+    .hero-code-bar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 15px 19px;
+      background: #191b21;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .hero-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .hero-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .hero-dots span:nth-child(1) {
+      background: #ff6259;
+    }
+
+    .hero-dots span:nth-child(2) {
+      background: #ffbd2e;
+    }
+
+    .hero-dots span:nth-child(3) {
+      background: #28c840;
+    }
+
+    .hero-filename {
+      color: var(--muted);
+      font: 0.82rem Consolas,monospace;
+    }
+
+    .hero-code-content {
+      padding: 27px 23px;
+      font: 0.89rem/2 Consolas,"Courier New",monospace;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .syntax-purple {
+      color: #caa6ff;
+    }
+
+    .syntax-orange {
+      color: var(--orange-light);
+    }
+
+    .syntax-green {
+      color: #85dca7;
+    }
+
+    .syntax-muted {
+      color: #777d89;
+    }
+
+    .hero-code-footer {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 13px 20px;
+      border-top: 1px solid rgba(255,255,255,0.075);
+      color: var(--success);
+      background: rgba(57,217,138,0.025);
+      font: 0.79rem Consolas,monospace;
+    }
+
+    /* =====================================
+       03 — SECTION HEADING
+       ===================================== */
+
+    .section-heading {
+      text-align: center;
+      margin-bottom: 33px;
+    }
+
+    .section-heading h2 {
+      margin: 14px 0;
+      font-size: clamp(1.85rem,3.2vw,2.85rem);
+      line-height: 1.25;
+    }
+
+    .section-heading p {
+      max-width: 750px;
+      margin: auto;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    /* =====================================
+       04 — LIVE HTTP LAB
+       ===================================== */
+
+    .live-lab {
+      position: relative;
+      isolation: isolate;
+      padding: 30px;
+      border-radius: 29px;
+      background: rgba(15,17,23,0.85);
+      border: 1px solid rgba(255,173,47,0.30);
+      backdrop-filter: blur(24px);
+      box-shadow:
+        0 25px 75px rgba(0,0,0,0.34),
+        0 0 50px rgba(255,121,0,0.055);
+      overflow: hidden;
+    }
+
+    .live-lab::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      top: -230px;
+      right: -200px;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: rgba(255,121,0,0.11);
+      filter: blur(70px);
+      pointer-events: none;
+    }
+
+    .lab-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 26px;
+    }
+
+    .lab-header h3 {
+      font-size: 1.45rem;
+      margin-bottom: 6px;
+    }
+
+    .lab-header p {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .lab-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 99px;
+      padding: 9px 15px;
+      border: 1px solid rgba(57,217,138,0.30);
+      background: rgba(57,217,138,0.07);
+      color: var(--success);
+      font-size: 0.75rem;
+      font-weight: 850;
+      letter-spacing: 0.5px;
+    }
+
+    .lab-badge::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--success);
+    }
+
+    /* =====================================
+       05 — ZAHTEV
+       ===================================== */
+
+    .request-config {
+      padding: 23px;
+      border-radius: 18px;
+      background: #0b0d12;
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .config-label {
+      display: block;
+      color: var(--orange-light);
+      font-weight: 800;
+      font-size: 0.75rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+    }
+
+    .request-method-row {
+      display: flex;
+      align-items: stretch;
+      gap: 11px;
+      margin-bottom: 15px;
+    }
+
+    .get-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 82px;
+      padding: 12px;
+      border-radius: 11px;
+      background: rgba(57,217,138,0.10);
+      border: 1px solid rgba(57,217,138,0.27);
+      color: var(--success);
+      font: 900 0.98rem Consolas,monospace;
+    }
+
+    .request-url {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      min-width: 0;
+      padding: 12px 15px;
+      border-radius: 11px;
+      background: rgba(255,255,255,0.045);
+      border: 1px solid rgba(255,255,255,0.10);
+      color: #f0cc91;
+      font: 0.84rem/1.6 Consolas,monospace;
+      overflow-wrap: anywhere;
+      user-select: all;
+    }
+
+    .request-config-note {
+      color: var(--muted);
+      font-size: 0.83rem;
+      line-height: 1.8;
+    }
+
+    .request-config-note code {
+      color: var(--gold-light);
+    }
+
+    /* =====================================
+       06 — SLANJE ZAHTEVA
+       ===================================== */
+
+    .request-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin: 24px 0;
+    }
+
+    .request-action-info {
+      min-width: 0;
+    }
+
+    .request-action-info strong {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 5px;
+    }
+
+    .request-action-info p {
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.6;
+    }
+
+    .request-actions .btn {
+      min-width: 240px;
+    }
+
+    .request-actions .btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .lab-message {
+      padding: 16px 19px;
+      margin-bottom: 22px;
+      border-left: 3px solid var(--orange);
+      border-radius: 0 12px 12px 0;
+      background: rgba(255,121,0,0.05);
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+
+    /* =====================================
+       07 — REZULTATI STATUS / VREME / METODA
+       ===================================== */
+
+    .response-metrics {
+      display: grid;
+      grid-template-columns: repeat(3,minmax(0,1fr));
+      gap: 13px;
+      margin-bottom: 21px;
+    }
+
+    .metric-card {
+      min-width: 0;
+      padding: 20px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.035);
+    }
+
+    .metric-card small {
+      display: block;
+      margin-bottom: 11px;
+      color: var(--muted);
+      font-size: 0.73rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .metric-card strong {
+      display: block;
+      color: var(--orange-light);
+      font: 850 clamp(1rem,1.8vw,1.4rem) Consolas,monospace;
+      overflow-wrap: anywhere;
+    }
+
+    .metric-card .metric-green {
+      color: var(--success);
+    }
+
+    .status-result[data-state="success"] strong {
+      color: var(--success);
+    }
+
+    .status-result[data-state="error"] strong {
+      color: var(--danger);
+    }
+
+    .status-result[data-state="loading"] strong {
+      color: var(--gold-light);
+    }
+
+    /* =====================================
+       08 — LIVE RESPONSE TERMINALI
+       ===================================== */
+
+    .response-panels {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 18px;
+    }
+
+    .response-terminal {
+      min-width: 0;
+      border-radius: 17px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.11);
+      background: #090b0f;
+    }
+
+    .response-terminal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 9px;
+      padding: 13px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: #191b20;
+    }
+
+    .response-terminal-header strong {
+      font-size: 0.91rem;
+    }
+
+    .response-terminal-header span {
+      color: var(--orange-light);
+      font: 0.73rem Consolas,monospace;
+    }
+
+    .response-terminal pre {
+      padding: 21px;
+      min-height: 230px;
+      max-height: 390px;
+      overflow: auto;
+      color: #ebcd99;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font: 0.84rem/1.85 Consolas,"Courier New",monospace;
+    }
+
+    .lab-footer-note {
+      margin-top: 20px;
+      padding-left: 15px;
+      border-left: 2px solid var(--orange);
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.8;
+    }
+
+    .lab-footer-note strong {
+      color: var(--orange-light);
+    }
+
+    /* =====================================
+       09 — HTTP TOK
+       ===================================== */
+
+    .pipeline-section {
+      margin-top: 90px;
+    }
+
+    .pipeline {
+      display: grid;
+      grid-template-columns: repeat(4,minmax(0,1fr));
+      gap: 16px;
+    }
+
+    .pipeline-card {
+      min-height: 225px;
+      padding: 25px 19px;
+      text-align: center;
+      background: rgba(20,22,28,0.73);
+      border-radius: 19px;
+      border: 1px solid var(--glass-border);
+    }
+
+    .pipeline-index {
+      display: grid;
+      place-items: center;
+      width: 55px;
+      height: 55px;
+      margin: 0 auto 21px;
+      border: 1px solid var(--glass-border);
+      border-radius: 17px;
+      background: rgba(255,121,0,0.09);
+      color: var(--orange-light);
+      font: 900 1.2rem Consolas,monospace;
+    }
+
+    .pipeline-card h3 {
+      font-size: 1.12rem;
+      margin-bottom: 10px;
+    }
+
+    .pipeline-card p {
+      font-size: 0.89rem;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    /* =====================================
+       10 — DEVELOPER TOOLS
+       ===================================== */
+
+    .devtools-section {
+      margin-top: 90px;
+    }
+
+    .devtools-layout {
+      display: grid;
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: 25px;
+      align-items: stretch;
+    }
+
+    .devtools-steps {
+      display: grid;
+      gap: 11px;
+    }
+
+    .devtools-step {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 15px;
+      background: rgba(255,255,255,0.035);
+      color: var(--muted);
+      text-align: left;
+      transition:
+        border-color 0.25s,
+        background 0.25s,
+        color 0.25s;
+    }
+
+    .devtools-step:hover {
+      border-color: var(--orange-light);
+      color: var(--white);
+    }
+
+    .devtools-step.active {
+      background: rgba(255,121,0,0.10);
+      border-color: rgba(255,171,49,0.49);
+      color: var(--white);
+    }
+
+    .devtools-step-number {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      flex: 0 0 36px;
+      border-radius: 11px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255,121,0,0.08);
+      color: var(--orange-light);
+      font: 900 0.88rem Consolas,monospace;
+    }
+
+    .devtools-step strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 0.94rem;
+    }
+
+    .devtools-step small {
+      display: block;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.5;
+    }
+
+    /* =====================================
+       11 — DEVELOPER TOOLS PREVIEW
+       ===================================== */
+
+    .devtools-display {
+      min-width: 0;
+      overflow: hidden;
+      border-radius: 19px;
+      background: #0a0c11;
+      border: 1px solid rgba(255,171,49,0.23);
+      box-shadow: 0 20px 45px rgba(0,0,0,0.24);
+    }
+
+    .devtools-bar {
+      display: flex;
+      gap: 17px;
+      align-items: center;
+      padding: 17px 19px;
+      background: #1a1c22;
+      border-bottom: 1px solid rgba(255,255,255,0.09);
+      color: var(--muted);
+      font-size: 0.81rem;
+    }
+
+    .devtools-bar .active {
+      color: var(--orange-light);
+      border-bottom: 2px solid var(--orange);
+      padding-bottom: 5px;
+    }
+
+    .devtools-caption {
+      color: var(--orange-light);
+      font: 800 0.72rem Consolas,monospace;
+      letter-spacing: 1px;
+      padding: 19px 19px 0;
+    }
+
+    .devtools-table-header,
+    .devtools-table-row {
+      display: grid;
+      grid-template-columns:
+        minmax(0,1fr) 85px 74px;
+      gap: 11px;
+      align-items: center;
+      padding: 13px 17px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font: 0.8rem Consolas,monospace;
+    }
+
+    .devtools-table-header {
+      margin-top: 17px;
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+    }
+
+    .devtools-table-row {
+      background: rgba(255,121,0,0.045);
+      color: var(--white);
+    }
+
+    .devtools-table-row span {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .devtools-table-row .request-name {
+      color: var(--gold-light);
+    }
+
+    .devtools-detail {
+      padding: 25px 21px;
+    }
+
+    .devtools-detail h3 {
+      font-size: 1.28rem;
+      margin-bottom: 11px;
+    }
+
+    .devtools-detail p {
+      color: var(--muted);
+      line-height: 1.85;
+      font-size: 0.93rem;
+    }
+
+    .devtools-shortcut {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 9px 16px;
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      background: rgba(255,121,0,0.07);
+      color: var(--orange-light);
+      font: 800 0.85rem Consolas,monospace;
+    }
+
+    .devtools-footnote {
+      padding: 0 21px 20px;
+      color: var(--dim);
+      font-size: 0.8rem;
+      line-height: 1.65;
+    }
+
+    /* =====================================
+       12 — ASINHRONI JS
+       ===================================== */
+
+    .async-section {
+      margin-top: 90px;
+    }
+
+    .async-grid {
+      display: grid;
+      grid-template-columns: repeat(3,minmax(0,1fr));
+      gap: 19px;
+    }
+
+    .async-card {
+      min-height: 225px;
+    }
+
+    .async-icon {
+      display: grid;
+      place-items: center;
+      width: 58px;
+      height: 58px;
+      margin-bottom: 20px;
+      border-radius: 17px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255,121,0,0.08);
+      color: var(--orange-light);
+      font: 900 1rem Consolas,monospace;
+    }
+
+    .async-card h3 {
+      margin-bottom: 10px;
+      font-size: 1.17rem;
+    }
+
+    .async-card p {
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 0.91rem;
+    }
+
+    /* =====================================
+       13 — KORISNE NAPOMENE
+       ===================================== */
+
+    .important-section {
+      margin-top: 80px;
+    }
+
+    .important-box {
+      padding: 27px;
+      border-left: 3px solid var(--orange);
+      border-radius: 0 18px 18px 0;
+      background: rgba(255,121,0,0.055);
+    }
+
+    .important-box h3 {
+      color: var(--orange-light);
+      font-size: 1.16rem;
+      margin-bottom: 13px;
+    }
+
+    .important-box p {
+      color: var(--muted);
+      line-height: 1.9;
+      font-size: 0.94rem;
+    }
+
+    .important-box code {
+      color: var(--gold-light);
+      font-family: Consolas,monospace;
+    }
+
+    .important-box p + p {
+      margin-top: 11px;
+    }
+
+    /* =====================================
+       14 — ZAKLJUČAK
+       ===================================== */
+
+    .practice-summary {
+      margin-top: 95px;
+      text-align: center;
+    }
+
+    .practice-summary h2 {
+      font-size: clamp(1.8rem,3vw,2.7rem);
+      margin: 14px 0 18px;
+    }
+
+    .practice-summary p {
+      max-width: 820px;
+      margin: auto;
+      color: var(--muted);
+      line-height: 1.85;
+    }
+
+    .summary-tags {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 26px;
+    }
+
+    .summary-tags span {
+      padding: 9px 17px;
+      border-radius: 99px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255,121,0,0.06);
+      color: var(--gold-light);
+      font: 800 0.85rem Consolas,monospace;
+    }
+
+    /* =====================================
+       15 — RESPONSIVE
+       ===================================== */
+
+    @media (max-width: 1000px) {
+      .practice-hero {
+        grid-template-columns: 1fr;
+        gap: 35px;
+        text-align: center;
+      }
+
+      .practice-hero p {
+        margin-inline: auto;
+      }
+
+      .hero-code-wrap {
+        max-width: 650px;
+        margin-inline: auto;
+        width: 100%;
+      }
+
+      .response-panels,
+      .devtools-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .pipeline {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+      }
+    }
+
+    @media (max-width: 700px) {
+      .practice-hero h1 {
+        letter-spacing: -1px;
+      }
+
+      .hero-code-window {
+        transform: none;
+      }
+
+      .hero-code-content {
+        padding: 19px 15px;
+        font-size: 0.78rem;
+      }
+
+      .live-lab {
+        padding: 17px;
+        border-radius: 21px;
+      }
+
+      .request-config {
+        padding: 16px;
+      }
+
+      .request-method-row {
+        flex-direction: column;
+      }
+
+      .get-badge {
+        align-self: flex-start;
+      }
+
+      .response-metrics {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+      }
+
+      .response-metrics .metric-card:last-child {
+        grid-column: 1 / -1;
+      }
+
+      .metric-card {
+        padding: 15px;
+      }
+
+      .metric-card strong {
+        font-size: 1rem;
+      }
+
+      .request-actions .btn {
+        width: 100%;
+      }
+
+      .response-terminal pre {
+        padding: 16px;
+        min-height: 155px;
+        font-size: 0.76rem;
+      }
+
+      .pipeline {
+        grid-template-columns: 1fr;
+      }
+
+      .pipeline-card {
+        min-height: 0;
+      }
+
+      .async-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .devtools-bar {
+        gap: 10px;
+        padding-inline: 11px;
+        font-size: 0.73rem;
+      }
+
+      .devtools-table-header,
+      .devtools-table-row {
+        grid-template-columns: minmax(0,1fr) 65px 57px;
+        gap: 6px;
+        padding: 12px 10px;
+        font-size: 0.69rem;
+      }
+
+      .pipeline-section,
+      .devtools-section,
+      .async-section,
+      .practice-summary {
+        margin-top: 65px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .live-indicator::before {
+        animation: none;
+      }
+
+      .hero-code-window {
+        transition: none;
+      }
+    }
+
+  </style>
+
+  <script src="script.js" defer></script>
+</head>
+
+<body>
+
+  <!-- POZADINA I NAVIGACIJA -->
+
+  <div id="site-background" aria-hidden="true"></div>
+  <div id="site-header"></div>
+
+  <main class="page-shell lesson-page">
+
+    <!-- ===================================
+         01 — HERO
+         =================================== -->
+
+    <section class="practice-hero">
+
+      <div class="fade-up">
+
+        <span class="section-label">
+          09 / 10 — HTTP u praksi
+        </span>
+
+        <h1>
+          Vreme je za
+          <span class="gradient-text">pravi zahtev.</span>
+        </h1>
+
+        <p>
+          Do sada smo simulirali HTTP komunikaciju.
+          Sada ćemo otići korak dalje.
+
+          Pomoću JavaScript funkcije
+          <strong>fetch()</strong> zaista ćemo
+          zatražiti JSON podatke od servera
+          i analizirati njegov odgovor.
+        </p>
+
+        <span class="live-indicator">
+          REAL HTTP REQUEST
+        </span>
+
+      </div>
+
+
+      <!-- ILUSTRACIJA JAVASCRIPT KODA -->
+
+      <div class="hero-code-wrap">
+
+        <div class="hero-code-window">
+
+          <div class="hero-code-bar">
+
+            <div class="hero-dots"
+                 aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+
+            <span class="hero-filename">
+              http-demo.js
+            </span>
+
+          </div>
+
+          <div class="hero-code-content"><span class="syntax-purple">const</span> response =
+  <span class="syntax-purple">await</span> <span class="syntax-orange">fetch</span>(
+    <span class="syntax-green">"./data/example.json"</span>
+  );
+
+<span class="syntax-purple">const</span> data =
+  <span class="syntax-purple">await</span> response.<span class="syntax-orange">json</span>();
+
+<span class="syntax-muted">// Rezultat HTTP komunikacije</span>
+console.<span class="syntax-orange">log</span>(response.status);
+console.<span class="syntax-orange">log</span>(data);</div>
+
+          <div class="hero-code-footer">
+            ● JavaScript Fetch API
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================
+         02 — LIVE HTTP INSPECTOR
+         =================================== -->
+
+    <section aria-labelledby="inspector-title">
+
+      <div class="section-heading">
+
+        <span class="section-label">
+          Stvarni mrežni zahtev
+        </span>
+
+        <h2 id="inspector-title">
+          Live HTTP
+          <span class="gradient-text">Inspector.</span>
+        </h2>
+
+        <p>
+          Klikni na „Pošalji GET zahtev“.
+          Browser će pokušati da preuzme
+          <strong>stvarni JSON fajl</strong>
+          sa istog web sajta.
+        </p>
+
+      </div>
+
+
+      <!--
+        ID fetch-demo aktivira
+        initFetchDemo() u script.js.
+      -->
+
+      <div class="live-lab"
+           id="fetch-demo">
+
+        <!-- ZAGLAVLJE -->
+
+        <div class="lab-header">
+
+          <div>
+            <h3>HTTP Request Console</h3>
+
+            <p>
+              Pregled odgovora direktno iz browsera
+            </p>
+          </div>
+
+          <span class="lab-badge">
+            REAL FETCH API
+          </span>
+
+        </div>
+
+
+        <!-- =============================
+             KONFIGURACIJA ZAHTEVA
+             ============================= -->
+
+        <div class="request-config">
+
+          <span class="config-label">
+            Request Configuration
+          </span>
+
+          <div class="request-method-row">
+
+            <span class="get-badge">
+              GET
+            </span>
+
+            <div class="request-url"
+                 id="fetch-url">
+              ./data/example.json
+            </div>
+
+          </div>
+
+          <p class="request-config-note">
+            <strong>Metoda:</strong> GET
+            · <strong>Resurs:</strong>
+            <code>data/example.json</code>
+            · <strong>Izvor:</strong> trenutni sajt
+          </p>
+
+          <p class="request-config-note">
+            Browser sam određuje odgovarajuća
+            mrežna zaglavlja i koristi dostupnu
+            HTTP verziju. Zahtev se izvršava
+            pomoću JavaScript Fetch API-ja.
+          </p>
+
+        </div>
+
+
+        <!-- =============================
+             DUGME ZA SLANJE
+             ============================= -->
+
+        <div class="request-actions">
+
+          <div class="request-action-info">
+
+            <strong>
+              Spremno za HTTP komunikaciju
+            </strong>
+
+            <p>
+              Podaci će biti preuzeti iz JSON fajla
+              smeštenog u ovom projektu.
+            </p>
+
+          </div>
+
+          <button type="button"
+                  class="btn btn-primary btn-large"
+                  id="fetch-button">
+
+            Pošalji GET zahtev →
+
+          </button>
+
+        </div>
+
+
+        <!-- PORUKE O TRENUTNOM STANJU -->
+
+        <div class="lab-message"
+             id="fetch-message"
+             aria-live="polite"
+             role="status">
+
+          Klikni na dugme da pošalješ
+          svoj prvi stvarni GET zahtev.
+
+        </div>
+
+
+        <!-- =============================
+             REZULTATI ZAHTEVA
+             ============================= -->
+
+        <div class="response-metrics">
+
+          <!-- HTTP STATUS -->
+
+          <div class="metric-card status-result"
+               id="fetch-status-card"
+               data-state="idle">
+
+            <small>HTTP status</small>
+
+            <strong id="fetch-status"
+                    aria-live="polite">
+              —
+            </strong>
+
+          </div>
+
+
+          <!-- VREME -->
+
+          <div class="metric-card">
+
+            <small>Trajanje zahteva</small>
+
+            <strong id="fetch-time">
+              —
+            </strong>
+
+          </div>
+
+
+          <!-- METODA -->
+
+          <div class="metric-card">
+
+            <small>HTTP metoda</small>
+
+            <strong class="metric-green">
+              GET
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- =============================
+             RESPONSE HEADERS / BODY
+             ============================= -->
+
+        <div class="response-panels">
+
+          <!-- ZAGLAVLJA -->
+
+          <div class="response-terminal">
+
+            <div class="response-terminal-header">
+
+              <strong>
+                Response Headers
+              </strong>
+
+              <span>
+                METADATA
+              </span>
+
+            </div>
+
+            <pre id="fetch-headers">Zaglavlja će biti prikazana nakon odgovora servera.</pre>
+
+          </div>
+
+
+          <!-- TELO ODGOVORA -->
+
+          <div class="response-terminal">
+
+            <div class="response-terminal-header">
+
+              <strong>
+                Response Body
+              </strong>
+
+              <span>
+                JSON / TEXT
+              </span>
+
+            </div>
+
+            <pre id="fetch-body">Ovde će biti prikazan sadržaj primljenog odgovora.</pre>
+
+          </div>
+
+        </div>
+
+
+        <p class="lab-footer-note">
+          <strong>Važno:</strong>
+          Trajanje se meri u browseru pomoću
+          <code>performance.now()</code> i predstavlja
+          približno ukupno vreme operacije
+          <code>fetch()</code> i čitanja odgovora,
+          a ne nužno samo mrežnu latenciju.
+          JavaScript prikazuje samo zaglavlja
+          koja su mu dostupna.
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================
+         03 — ŠTA SE DOGAĐA?
+         =================================== -->
+
+    <section class="pipeline-section"
+             aria-labelledby="pipeline-title">
+
+      <div class="section-heading">
+
+        <span class="section-label">
+          Od JavaScripta do podataka
+        </span>
+
+        <h2 id="pipeline-title">
+          Četiri koraka
+          <span class="gradient-text">stvarnog zahteva.</span>
+        </h2>
+
+        <p>
+          Pogledaj šta se događa kada
+          pozovemo funkciju fetch().
+        </p>
+
+      </div>
+
+
+      <div class="pipeline">
+
+        <article class="pipeline-card">
+
+          <div class="pipeline-index">
+            01
+          </div>
+
+          <h3>JavaScript poziva fetch()</h3>
+
+          <p>
+            Browser dobija instrukciju
+            da zatraži određeni resurs
+            sa web servera.
+          </p>
+
+        </article>
+
+
+        <article class="pipeline-card">
+
+          <div class="pipeline-index">
+            02
+          </div>
+
+          <h3>Šalje se HTTP zahtev</h3>
+
+          <p>
+            Browser šalje GET zahtev.
+            Server prima zahtev i pokušava
+            da pronađe JSON fajl.
+          </p>
+
+        </article>
+
+
+        <article class="pipeline-card">
+
+          <div class="pipeline-index">
+            03
+          </div>
+
+          <h3>Stiže HTTP odgovor</h3>
+
+          <p>
+            Server vraća statusni kod,
+            zaglavlja i telo odgovora
+            ako ono postoji.
+          </p>
+
+        </article>
+
+
+        <article class="pipeline-card">
+
+          <div class="pipeline-index">
+            04
+          </div>
+
+          <h3>JavaScript obrađuje podatke</h3>
+
+          <p>
+            Aplikacija čita odgovor,
+            po potrebi parsira JSON
+            i prikazuje rezultate.
+          </p>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================
+         04 — DEVELOPER TOOLS
+         =================================== -->
+
+    <section class="devtools-section"
+             aria-labelledby="devtools-title">
+
+      <div class="section-heading">
+
+        <span class="section-label">
+          Browser Developer Tools
+        </span>
+
+        <h2 id="devtools-title">
+          Pogledaj HTTP
+          <span class="gradient-text">iza kulisa.</span>
+        </h2>
+
+        <p>
+          Browser ima ugrađene alate kojima
+          možemo da analiziramo stvarne
+          mrežne zahteve. Isprobaj ih na ovoj stranici.
+        </p>
+
+      </div>
+
+
+      <div class="devtools-layout">
+
+        <!-- INTERAKTIVNI KORACI -->
+
+        <div class="devtools-steps"
+             id="devtools-steps">
+
+          <button type="button"
+                  class="devtools-step active"
+                  data-devtools-step="0"
+                  aria-pressed="true">
+
+            <span class="devtools-step-number">
+              01
+            </span>
+
+            <span>
+              <strong>Otvori Developer Tools</strong>
+              <small>Pritisni F12 ili Ctrl + Shift + I.</small>
+            </span>
+
+          </button>
+
+
+          <button type="button"
+                  class="devtools-step"
+                  data-devtools-step="1"
+                  aria-pressed="false">
+
+            <span class="devtools-step-number">
+              02
+            </span>
+
+            <span>
+              <strong>Izaberi Network</strong>
+              <small>Otvori karticu za mrežni saobraćaj.</small>
+            </span>
+
+          </button>
+
+
+          <button type="button"
+                  class="devtools-step"
+                  data-devtools-step="2"
+                  aria-pressed="false">
+
+            <span class="devtools-step-number">
+              03
+            </span>
+
+            <span>
+              <strong>Pošalji zahtev</strong>
+              <small>Vrati se na Live HTTP Inspector.</small>
+            </span>
+
+          </button>
+
+
+          <button type="button"
+                  class="devtools-step"
+                  data-devtools-step="3"
+                  aria-pressed="false">
+
+            <span class="devtools-step-number">
+              04
+            </span>
+
+            <span>
+              <strong>Analiziraj odgovor</strong>
+              <small>Pregledaj Headers, Preview i Response.</small>
+            </span>
+
+          </button>
+
+        </div>
+
+
+        <!-- VIZUELNI PRIKAZ NETWORK KARTICE -->
+
+        <div class="devtools-display">
+
+          <div class="devtools-bar">
+
+            <span>Elements</span>
+            <span>Console</span>
+            <span class="active">Network</span>
+            <span>Sources</span>
+
+          </div>
+
+          <div class="devtools-caption">
+            NETWORK REQUEST — ILUSTRATIVNI PRIKAZ
+          </div>
+
+          <div class="devtools-table-header">
+
+            <span>Name</span>
+            <span>Status</span>
+            <span>Method</span>
+
+          </div>
+
+          <div class="devtools-table-row">
+
+            <span class="request-name">
+              example.json
+            </span>
+
+            <span id="network-demo-status">
+              —
+            </span>
+
+            <span>
+              GET
+            </span>
+
+          </div>
+
+
+          <div class="devtools-detail"
+               aria-live="polite">
+
+            <h3 id="devtools-step-title">
+              Otvori Developer Tools
+            </h3>
+
+            <p id="devtools-step-description">
+              Pritisni F12 ili Ctrl + Shift + I
+              dok je ova stranica otvorena.
+              Developer Tools omogućava pregled
+              elemenata stranice, JavaScript konzole
+              i mrežne komunikacije.
+            </p>
+
+            <span class="devtools-shortcut"
+                  id="devtools-step-shortcut">
+              F12
+            </span>
+
+          </div>
+
+
+          <p class="devtools-footnote">
+            Ovaj panel je edukativna ilustracija.
+            Stvarni detalji zahteva nalaze se
+            u Network kartici tvog browsera.
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================
+         05 — JAVASCRIPT I HTTP
+         =================================== -->
+
+    <section class="async-section"
+             aria-labelledby="async-title">
+
+      <div class="section-heading">
+
+        <span class="section-label">
+          JavaScript Fetch API
+        </span>
+
+        <h2 id="async-title">
+          Zašto koristimo
+          <span class="gradient-text">fetch()?</span>
+        </h2>
+
+        <p>
+          Fetch API omogućava JavaScript kodu
+          da šalje HTTP zahteve
+          i asinhrono obrađuje odgovore.
+        </p>
+
+      </div>
+
+
+      <div class="async-grid">
+
+        <article class="glass-card async-card">
+
+          <div class="async-icon">
+            GET
+          </div>
+
+          <h3>Slanje zahteva</h3>
+
+          <p>
+            Funkcija fetch() započinje
+            zahtev prema zadatoj adresi.
+            Podrazumevana HTTP metoda je GET.
+          </p>
+
+        </article>
+
+
+        <article class="glass-card async-card">
+
+          <div class="async-icon">
+            await
+          </div>
+
+          <h3>Asinhrona obrada</h3>
+
+          <p>
+            JavaScript može da čeka rezultat
+            asinhrone operacije pomoću
+            async/await sintakse bez blokiranja
+            glavne niti tokom mrežnog čekanja.
+          </p>
+
+        </article>
+
+
+        <article class="glass-card async-card">
+
+          <div class="async-icon">
+            JSON
+          </div>
+
+          <h3>Rad sa podacima</h3>
+
+          <p>
+            JSON je čest format razmene podataka
+            između web aplikacija i servera.
+            JavaScript može da ga pretvori
+            u objekte i nizove.
+          </p>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================
+         06 — VAŽNA NAPOMENA
+         =================================== -->
+
+    <section class="important-section">
+
+      <div class="important-box">
+
+        <h3>
+          Šta ako se pojavi 404 ili Network error?
+        </h3>
+
+        <p>
+          Ako dobiješ <code>404 Not Found</code>,
+          browser je možda uspešno kontaktirao
+          server, ali fajl
+          <code>data/example.json</code>
+          još ne postoji na traženoj adresi.
+        </p>
+
+        <p>
+          Ako stranicu otvoriš direktno preko
+          <code>file://</code>, browser može blokirati
+          fetch zahtev zbog bezbednosnih ograničenja.
+          Zato projekat pokreći pomoću
+          <strong>VS Code Live Servera</strong>
+          ili preko <strong>GitHub Pages</strong>.
+        </p>
+
+        <p>
+          Važno je i da <code>fetch()</code> ne odbacuje
+          Promise samo zato što je server vratio
+          status poput 404 ili 500.
+          Za proveru uspešnog HTTP odgovora
+          koristimo <code>response.ok</code>
+          ili <code>response.status</code>.
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================
+         07 — ZAKLJUČAK
+         =================================== -->
+
+    <section class="practice-summary">
+
+      <div class="glass-card">
+
+        <span class="section-label">
+          Zapamti
+        </span>
+
+        <h2>
+          HTTP nije samo teorija.
+          <span class="gradient-text">Koristimo ga svakodnevno.</span>
+        </h2>
+
+        <p>
+          Uz Fetch API možemo da šaljemo
+          HTTP zahteve iz JavaScripta,
+          dobijamo odgovore servera
+          i obrađujemo podatke bez ponovnog
+          učitavanja cele web stranice.
+
+          Developer Tools nam omogućava da
+          detaljno ispitamo te zahteve
+          i razumemo šta se događa na mreži.
+        </p>
+
+        <div class="summary-tags">
+
+          <span>fetch()</span>
+          <span>GET</span>
+          <span>HTTP Status</span>
+          <span>Headers</span>
+          <span>JSON</span>
+          <span>Network</span>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- NAVIGACIJA -->
+
+    <div id="lesson-navigation"></div>
+
+  </main>
+
+  <div id="site-footer"></div>
+
+
+  <!-- ===================================
+       08 — DODATNI JAVASCRIPT
+       =================================== -->
+
+  <script>
+    (() => {
+      "use strict";
+
+      /*
+       * Zajednički script.js već obavlja
+       * stvarni fetch() zahtev i ažurira:
+       *
+       * fetch-status
+       * fetch-time
+       * fetch-headers
+       * fetch-body
+       * fetch-message
+       *
+       * Zato ovde NE šaljemo drugi zahtev.
+       *
+       * Dodajemo samo:
+       * - prikaz pune URL adrese
+       * - bojenje dobijenog statusa
+       * - interaktivni DevTools vodič
+       * - sinhronizaciju statusa u ilustraciji
+       */
+
+
+      /* ---------------------------------
+         STVARNA ADRESA JSON RESURSA
+         --------------------------------- */
+
+      const urlElement =
+        document.getElementById("fetch-url");
+
+      if (urlElement) {
+
+        const resourceURL = new URL(
+          "./data/example.json",
+          window.location.href
+        );
+
+        urlElement.textContent = resourceURL.href;
+
+      }
+
+
+      /* ---------------------------------
+         PRIKAZ HTTP STATUSA
+         --------------------------------- */
+
+      const statusElement =
+        document.getElementById("fetch-status");
+
+      const statusCard =
+        document.getElementById("fetch-status-card");
+
+      const demoStatus =
+        document.getElementById("network-demo-status");
+
+
+      function updateStatusAppearance() {
+
+        if (!statusElement || !statusCard) {
+          return;
+        }
+
+        const value = statusElement.textContent.trim();
+
+        let state = "idle";
+
+        if (value === "Čekanje...") {
+
+          state = "loading";
+
+        } else if (value === "Network error") {
+
+          state = "error";
+
+        } else {
+
+          const match = value.match(/^(\d{3})\b/);
+
+          if (match) {
+
+            const code = Number(match[1]);
+
+            if (code >= 200 && code < 300) {
+
+              state = "success";
+
+            } else if (code >= 400) {
+
+              state = "error";
+
+            }
+
+          }
+
+        }
+
+        statusCard.dataset.state = state;
+
+        if (demoStatus) {
+          demoStatus.textContent = value;
+        }
+
+      }
+
+
+      if (statusElement) {
+
+        const observer = new MutationObserver(
+          updateStatusAppearance
+        );
+
+        observer.observe(statusElement, {
+          childList: true,
+          characterData: true,
+          subtree: true
+        });
+
+        updateStatusAppearance();
+
+      }
+
+
+      /* ---------------------------------
+         INTERAKTIVNI DEVTOOLS VODIČ
+         --------------------------------- */
+
+      const steps = [
+
+        {
+          title: "Otvori Developer Tools",
+
+          description:
+            "Pritisni F12 ili Ctrl + Shift + I " +
+            "dok je ova stranica otvorena. " +
+            "Developer Tools omogućava pregled " +
+            "HTML-a, CSS-a, JavaScript konzole " +
+            "i mrežne komunikacije.",
+
+          shortcut: "F12"
+        },
+
+        {
+          title: "Pronađi karticu Network",
+
+          description:
+            "U Developer Tools prozoru izaberi " +
+            "Network. Ako želiš da vidiš samo " +
+            "zahteve koji koriste Fetch API, " +
+            "možeš koristiti filter Fetch/XHR.",
+
+          shortcut: "Network"
+        },
+
+        {
+          title: "Pošalji GET zahtev",
+
+          description:
+            "Dok je Network kartica otvorena, " +
+            "vrati se na Live HTTP Inspector " +
+            "i klikni na Pošalji GET zahtev. " +
+            "Potraži zahtev za example.json " +
+            "u spisku mrežnih aktivnosti.",
+
+          shortcut: "example.json"
+        },
+
+        {
+          title: "Pročitaj detalje zahteva",
+
+          description:
+            "Klikni na zahtev example.json. " +
+            "Kartica Headers prikazuje informacije " +
+            "o zahtevu i odgovoru. Response prikazuje " +
+            "sadržaj odgovora, a Preview može " +
+            "prikazati strukturirane JSON podatke.",
+
+          shortcut: "Headers / Response"
+        }
+
+      ];
+
+
+      const stepsContainer =
+        document.getElementById("devtools-steps");
+
+
+      function setText(id, value) {
+
+        const element = document.getElementById(id);
+
+        if (element) {
+          element.textContent = value;
+        }
+
+      }
+
+
+      function selectStep(index) {
+
+        const step = steps[index];
+
+        if (!step || !stepsContainer) return;
+
+        stepsContainer
+          .querySelectorAll("[data-devtools-step]")
+          .forEach(button => {
+
+            const active =
+              Number(button.dataset.devtoolsStep) === index;
+
+            button.classList.toggle(
+              "active",
+              active
+            );
+
+            button.setAttribute(
+              "aria-pressed",
+              String(active)
+            );
+
+          });
+
+
+        setText(
+          "devtools-step-title",
+          step.title
+        );
+
+        setText(
+          "devtools-step-description",
+          step.description
+        );
+
+        setText(
+          "devtools-step-shortcut",
+          step.shortcut
+        );
+
+      }
+
+
+      if (stepsContainer) {
+
+        stepsContainer
+          .querySelectorAll("[data-devtools-step]")
+          .forEach(button => {
+
+            button.addEventListener("click", () => {
+
+              selectStep(
+                Number(button.dataset.devtoolsStep)
+              );
+
+            });
+
+          });
+
+        selectStep(0);
+
+      }
+
+    })();
+  </script>
+
+</body>
+</html>

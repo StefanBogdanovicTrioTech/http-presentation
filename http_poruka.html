@@ -1,0 +1,1643 @@
+
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <meta name="theme-color" content="#08090c">
+
+  <meta name="description"
+        content="Interaktivna anatomija HTTP zahteva i odgovora. Istraži početnu liniju, zaglavlja, statusne kodove i telo HTTP poruke.">
+
+  <title>HTTP poruka | HTTP Protokol</title>
+  <link rel="icon" type="image/png" href="./slike/ikonica.png">
+  
+
+  <link rel="stylesheet" href="style.css">
+
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+
+    /* =====================================
+       01 — NASLOV I UVOD
+       ===================================== */
+
+    .message-hero {
+      max-width: 950px;
+      margin: 0 auto 55px;
+      text-align: center;
+    }
+
+    .message-hero h1 {
+      font-size: clamp(2.7rem, 5vw, 5rem);
+      line-height: 1.12;
+      letter-spacing: -2px;
+      margin: 18px 0 22px;
+      font-weight: 900;
+    }
+
+    .message-hero p {
+      max-width: 740px;
+      margin: auto;
+      color: var(--muted);
+      font-size: 1.13rem;
+      line-height: 1.85;
+    }
+
+    .hero-tags {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 25px;
+    }
+
+    .hero-tag {
+      padding: 8px 17px;
+      border-radius: 99px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 121, 0, 0.06);
+      color: var(--gold-light);
+      font-family: Consolas, monospace;
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    /* =====================================
+       02 — OSNOVNI PRINCIP
+       ===================================== */
+
+    .message-formula {
+      max-width: 1000px;
+      margin: 0 auto 85px;
+      padding: 30px;
+      border-radius: 24px;
+      border: 1px solid var(--glass-border);
+      background: rgba(20, 21, 26, 0.72);
+      backdrop-filter: blur(20px);
+      text-align: center;
+    }
+
+    .message-formula h2 {
+      font-size: 1.23rem;
+      margin-bottom: 23px;
+    }
+
+    .formula-parts {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .formula-part {
+      padding: 15px 19px;
+      border: 1px solid rgba(255, 178, 65, 0.3);
+      border-radius: 13px;
+      background: rgba(255, 121, 0, 0.065);
+      color: var(--white);
+      font-size: 0.9rem;
+      font-weight: 750;
+    }
+
+    .formula-part strong {
+      color: var(--orange-light);
+    }
+
+    .formula-symbol {
+      color: var(--orange-light);
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+
+    .formula-note {
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    /* =====================================
+       03 — NASLOVI SEKCIJA
+       ===================================== */
+
+    .section-heading {
+      text-align: center;
+      margin-bottom: 33px;
+    }
+
+    .section-heading h2 {
+      margin: 14px 0;
+      font-size: clamp(1.8rem, 3.3vw, 2.8rem);
+      line-height: 1.25;
+    }
+
+    .section-heading p {
+      max-width: 720px;
+      margin: auto;
+      color: var(--muted);
+    }
+
+    /* =====================================
+       04 — MESSAGE INSPECTOR
+       ===================================== */
+
+    .inspector-container {
+      padding: 28px;
+      border-radius: 28px;
+      border: 1px solid rgba(255, 176, 50, 0.28);
+      background: rgba(15, 17, 23, 0.83);
+      backdrop-filter: blur(24px);
+      box-shadow:
+        0 24px 65px rgba(0, 0, 0, 0.3),
+        0 0 45px rgba(255, 121, 0, 0.055);
+    }
+
+    .inspector-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 25px;
+    }
+
+    .inspector-header h3 {
+      font-size: 1.45rem;
+      line-height: 1.3;
+    }
+
+    .inspector-header p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    .inspector-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--gold-light);
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 121, 0, 0.065);
+      border-radius: 99px;
+      padding: 8px 15px;
+      font-size: 0.76rem;
+      font-weight: 750;
+    }
+
+    .inspector-badge::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--orange-light);
+      box-shadow: 0 0 12px var(--orange);
+    }
+
+    /* =====================================
+       05 — DVA HTTP TERMINALA
+       ===================================== */
+
+    .http-messages {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .http-terminal {
+      min-width: 0;
+      overflow: hidden;
+      background: #0a0c11;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 19px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.22);
+    }
+
+    .terminal-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 15px 18px;
+      background: #191b21;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .terminal-heading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .terminal-dots {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .terminal-dots span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .terminal-dots span:nth-child(1) {
+      background: #ff6259;
+    }
+
+    .terminal-dots span:nth-child(2) {
+      background: #ffbd2e;
+    }
+
+    .terminal-dots span:nth-child(3) {
+      background: #28c840;
+    }
+
+    .terminal-heading strong {
+      font-size: 0.88rem;
+    }
+
+    .terminal-label {
+      color: var(--orange-light);
+      font-family: Consolas, monospace;
+      font-size: 0.73rem;
+      white-space: nowrap;
+    }
+
+    .terminal-content {
+      min-height: 365px;
+      padding: 20px 13px 25px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .wire-line {
+      display: grid;
+      grid-template-columns: 35px minmax(0, 1fr);
+      align-items: baseline;
+      gap: 8px;
+      width: 100%;
+      padding: 9px 10px;
+      border: 1px solid transparent;
+      border-radius: 9px;
+      background: transparent;
+      text-align: left;
+      color: #e9dfd1;
+      cursor: pointer;
+      transition:
+        background 0.25s,
+        border-color 0.25s,
+        color 0.25s;
+    }
+
+    .wire-line:hover {
+      background: rgba(255, 121, 0, 0.085);
+      border-color: rgba(255, 171, 45, 0.17);
+    }
+
+    .wire-line.selected {
+      background: rgba(255, 121, 0, 0.13);
+      border-color: rgba(255, 171, 45, 0.48);
+      box-shadow: inset 3px 0 0 var(--orange);
+    }
+
+    .line-number {
+      color: #646976;
+      font-family: Consolas, monospace;
+      font-size: 0.76rem;
+      user-select: none;
+    }
+
+    .line-content {
+      min-width: 0;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      overflow-wrap: anywhere;
+    }
+
+    .syntax-method {
+      color: #ffac32;
+      font-weight: 800;
+    }
+
+    .syntax-header {
+      color: #deb875;
+    }
+
+    .syntax-value {
+      color: #91dba9;
+    }
+
+    .syntax-status {
+      color: #47db98;
+      font-weight: 800;
+    }
+
+    .syntax-json {
+      color: #ecc49a;
+    }
+
+    .syntax-string {
+      color: #a0d8a8;
+    }
+
+    .wire-separator {
+      margin: 7px 10px;
+      padding: 5px 10px 5px 51px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.13);
+      color: #787d88;
+      font-family: Consolas, monospace;
+      font-size: 0.73rem;
+    }
+
+    .terminal-caption {
+      margin-top: auto;
+      padding: 20px 10px 0;
+      color: var(--dim);
+      font-size: 0.77rem;
+      line-height: 1.6;
+    }
+
+    /* =====================================
+       06 — IZBOR DELA PORUKE
+       ===================================== */
+
+    .inspector-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 28px 0 20px;
+    }
+
+    .inspector-tab {
+      flex: 1;
+      min-width: 150px;
+      min-height: 49px;
+      padding: 11px 13px;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      border-radius: 13px;
+      background: rgba(255, 255, 255, 0.045);
+      color: var(--muted);
+      font-weight: 750;
+      font-size: 0.87rem;
+      transition:
+        color 0.25s,
+        border-color 0.25s,
+        background 0.25s;
+    }
+
+    .inspector-tab:hover {
+      color: var(--white);
+      border-color: var(--orange-light);
+    }
+
+    .inspector-tab.active {
+      color: #181008;
+      background: var(--gradient);
+      border-color: var(--orange-light);
+      box-shadow: 0 5px 22px rgba(255, 121, 0, 0.17);
+    }
+
+    /* =====================================
+       07 — PANEL SA OBJAŠNJENJEM
+       ===================================== */
+
+    .inspect-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 23px;
+      align-items: stretch;
+      padding: 25px;
+      border-radius: 19px;
+      background: rgba(255, 121, 0, 0.045);
+      border: 1px solid rgba(255, 171, 45, 0.18);
+    }
+
+    .details-eyebrow {
+      display: block;
+      color: var(--orange-light);
+      font-size: 0.73rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 9px;
+    }
+
+    .details-text h3 {
+      font-size: clamp(1.3rem, 2.2vw, 1.9rem);
+      margin-bottom: 12px;
+    }
+
+    .details-text p {
+      color: var(--muted);
+      line-height: 1.85;
+      font-size: 0.96rem;
+    }
+
+    .details-example {
+      min-width: 0;
+      background: #090b0f;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: 13px;
+      overflow: hidden;
+    }
+
+    .details-example-label {
+      padding: 10px 15px;
+      background: rgba(255, 255, 255, 0.045);
+      color: var(--muted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.76rem;
+      font-weight: 750;
+    }
+
+    .details-example pre {
+      padding: 20px 17px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.87rem;
+      line-height: 1.8;
+      color: var(--gold-light);
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    /* =====================================
+       08 — POREĐENJE REQUEST / RESPONSE
+       ===================================== */
+
+    .anatomy-section {
+      margin-top: 90px;
+    }
+
+    .anatomy-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 23px;
+    }
+
+    .anatomy-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 290px;
+    }
+
+    .anatomy-card::after {
+      content: "";
+      position: absolute;
+      top: -85px;
+      right: -85px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: rgba(255, 121, 0, 0.07);
+      filter: blur(30px);
+      pointer-events: none;
+    }
+
+    .anatomy-icon {
+      width: 59px;
+      height: 59px;
+      margin-bottom: 18px;
+      display: grid;
+      place-items: center;
+      border-radius: 17px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 121, 0, 0.08);
+      color: var(--orange-light);
+    }
+
+    .anatomy-icon svg {
+      width: 30px;
+      height: 30px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .anatomy-card h3 {
+      font-size: 1.35rem;
+      margin-bottom: 13px;
+    }
+
+    .anatomy-list {
+      display: grid;
+      gap: 13px;
+      margin-top: 20px;
+    }
+
+    .anatomy-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .anatomy-item span:first-child {
+      color: var(--orange-light);
+      font-weight: 800;
+      font-family: Consolas, monospace;
+      flex: 0 0 22px;
+    }
+
+    /* =====================================
+       09 — PRAZAN RED
+       ===================================== */
+
+    .separator-section {
+      margin-top: 85px;
+    }
+
+    .separator-card {
+      padding: 38px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 35px;
+      align-items: center;
+    }
+
+    .separator-card h2 {
+      font-size: clamp(1.6rem, 2.7vw, 2.5rem);
+      line-height: 1.25;
+      margin: 14px 0;
+    }
+
+    .separator-card p {
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .separator-code {
+      padding: 23px;
+      border-radius: 15px;
+      background: #090b0f;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      font: 0.92rem/2 Consolas, "Courier New", monospace;
+    }
+
+    .separator-code .line {
+      display: block;
+      overflow-wrap: anywhere;
+    }
+
+    .separator-code .emphasis {
+      display: block;
+      padding: 4px 10px;
+      margin: 4px -10px;
+      border: 1px dashed rgba(255, 172, 49, 0.48);
+      background: rgba(255, 121, 0, 0.075);
+      color: var(--orange-light);
+    }
+
+    /* =====================================
+       10 — KLJUČNE ČINJENICE
+       ===================================== */
+
+    .facts-section {
+      margin-top: 85px;
+    }
+
+    .facts-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .fact-card {
+      text-align: center;
+      padding: 28px 22px;
+      background: rgba(22, 24, 29, 0.68);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+    }
+
+    .fact-number {
+      display: block;
+      margin-bottom: 12px;
+      color: var(--orange-light);
+      font-family: Consolas, monospace;
+      font-size: 1.65rem;
+      font-weight: 900;
+    }
+
+    .fact-card h3 {
+      font-size: 1.08rem;
+      margin-bottom: 9px;
+    }
+
+    .fact-card p {
+      color: var(--muted);
+      font-size: 0.89rem;
+      line-height: 1.75;
+    }
+
+    /* =====================================
+       11 — ZAKLJUČAK
+       ===================================== */
+
+    .message-summary {
+      margin-top: 85px;
+      text-align: center;
+    }
+
+    .message-summary h2 {
+      font-size: clamp(1.7rem, 3vw, 2.6rem);
+      margin: 12px 0 18px;
+    }
+
+    .message-summary p {
+      max-width: 820px;
+      margin: auto;
+      color: var(--muted);
+      line-height: 1.85;
+    }
+
+    /* =====================================
+       12 — RESPONSIVE
+       ===================================== */
+
+    @media (max-width: 950px) {
+
+      .http-messages,
+      .inspect-details,
+      .separator-card {
+        grid-template-columns: 1fr;
+      }
+
+      .terminal-content {
+        min-height: 270px;
+      }
+
+      .facts-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+
+      .message-hero h1 {
+        letter-spacing: -1px;
+      }
+
+      .message-formula {
+        padding: 24px 17px;
+        margin-bottom: 65px;
+      }
+
+      .inspector-container {
+        padding: 16px;
+        border-radius: 20px;
+      }
+
+      .inspector-tabs {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .inspector-tab {
+        min-width: 0;
+        font-size: 0.79rem;
+        padding: 11px 8px;
+      }
+
+      .terminal-content {
+        padding: 12px 5px 20px;
+      }
+
+      .wire-line {
+        grid-template-columns: 25px minmax(0, 1fr);
+        gap: 5px;
+        padding: 8px 6px;
+      }
+
+      .line-content {
+        font-size: 0.73rem;
+      }
+
+      .wire-separator {
+        padding-left: 35px;
+      }
+
+      .inspect-details {
+        padding: 20px 15px;
+      }
+
+      .anatomy-grid,
+      .facts-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .separator-card {
+        padding: 24px 18px;
+      }
+
+      .anatomy-section,
+      .separator-section,
+      .facts-section,
+      .message-summary {
+        margin-top: 65px;
+      }
+    }
+
+  </style>
+
+  <script src="script.js" defer></script>
+</head>
+
+<body>
+
+  <!-- GLOBALNA POZADINA I HEADER -->
+
+  <div id="site-background" aria-hidden="true"></div>
+  <div id="site-header"></div>
+
+  <main class="page-shell lesson-page">
+
+    <!-- =================================
+         01 — HERO
+         ================================= -->
+
+    <section class="message-hero">
+
+      <span class="section-label">
+        04 / 10 — Struktura komunikacije
+      </span>
+
+      <h1>
+        Anatomija
+        <span class="gradient-text">HTTP poruke.</span>
+      </h1>
+
+      <p>
+        Svaka HTTP komunikacija koristi zahteve
+        i odgovore. Ali šta se zapravo nalazi
+        unutar tih poruka?
+
+        Istraži njihov sadržaj, klikni na pojedinačne
+        delove i otkrij ulogu svakog elementa.
+      </p>
+
+      <div class="hero-tags">
+        <span class="hero-tag">Start Line</span>
+        <span class="hero-tag">Headers</span>
+        <span class="hero-tag">Body</span>
+        <span class="hero-tag">Status Code</span>
+      </div>
+
+    </section>
+
+
+    <!-- =================================
+         02 — FORMULA HTTP PORUKE
+         ================================= -->
+
+    <section class="message-formula"
+             aria-labelledby="formula-title">
+
+      <h2 id="formula-title">
+        Osnovna struktura tekstualne HTTP/1.1 poruke
+      </h2>
+
+      <div class="formula-parts">
+
+        <div class="formula-part">
+          <strong>01</strong> Početna linija
+        </div>
+
+        <span class="formula-symbol">+</span>
+
+        <div class="formula-part">
+          <strong>02</strong> Zaglavlja
+        </div>
+
+        <span class="formula-symbol">+</span>
+
+        <div class="formula-part">
+          <strong>03</strong> Prazan red
+        </div>
+
+        <span class="formula-symbol">+</span>
+
+        <div class="formula-part">
+          <strong>04</strong> Opciono telo
+        </div>
+
+      </div>
+
+      <p class="formula-note">
+        Primer se odnosi na tekstualni format HTTP/1.1.
+        HTTP/2 i HTTP/3 koriste binarno uokviravanje.
+      </p>
+
+    </section>
+
+
+    <!-- =================================
+         03 — INTERAKTIVNI INSPEKTOR
+         ================================= -->
+
+    <section aria-labelledby="inspector-title">
+
+      <div class="section-heading">
+
+        <span class="section-label">
+          Interaktivna demonstracija
+        </span>
+
+        <h2 id="inspector-title">
+          HTTP Message
+          <span class="gradient-text">Inspector.</span>
+        </h2>
+
+        <p>
+          Klikni direktno na linije zahteva ili odgovora,
+          ili izaberi deo poruke pomoću dugmadi.
+        </p>
+
+      </div>
+
+
+      <div class="inspector-container">
+
+        <div class="inspector-header">
+
+          <div>
+            <h3>Analiza HTTP komunikacije</h3>
+            <p>
+              Primer preuzimanja JSON podataka
+              o jednom korisniku
+            </p>
+          </div>
+
+          <span class="inspector-badge">
+            HTTP/1.1 EXAMPLE
+          </span>
+
+        </div>
+
+
+        <!-- =============================
+             DVA TERMINALA
+             ============================= -->
+
+        <div class="http-messages">
+
+          <!-- HTTP REQUEST -->
+
+          <div class="http-terminal">
+
+            <div class="terminal-bar">
+
+              <div class="terminal-heading">
+
+                <div class="terminal-dots"
+                     aria-hidden="true">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+
+                <strong>HTTP Request</strong>
+
+              </div>
+
+              <span class="terminal-label">
+                CLIENT →
+              </span>
+
+            </div>
+
+
+            <div class="terminal-content">
+
+              <!-- Početna linija -->
+
+              <button type="button"
+                      class="wire-line selected"
+                      data-inspect="request-line">
+
+                <span class="line-number">01</span>
+
+                <span class="line-content">
+                  <span class="syntax-method">GET</span>
+                  /users/1 HTTP/1.1
+                </span>
+
+              </button>
+
+
+              <!-- HTTP zaglavlja -->
+
+              <button type="button"
+                      class="wire-line"
+                      data-inspect="headers">
+
+                <span class="line-number">02</span>
+
+                <span class="line-content">
+                  <span class="syntax-header">Host:</span>
+                  <span class="syntax-value">example.com</span>
+                </span>
+
+              </button>
+
+
+              <button type="button"
+                      class="wire-line"
+                      data-inspect="headers">
+
+                <span class="line-number">03</span>
+
+                <span class="line-content">
+                  <span class="syntax-header">Accept:</span>
+                  <span class="syntax-value">application/json</span>
+                </span>
+
+              </button>
+
+
+              <!-- Razdvajanje -->
+
+              <div class="wire-separator">
+                04 — prazan red
+              </div>
+
+
+              <p class="terminal-caption">
+                Ovaj GET zahtev nema telo.
+                Njegov cilj je preuzimanje
+                predstavljanja resursa.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <!-- HTTP RESPONSE -->
+
+          <div class="http-terminal">
+
+            <div class="terminal-bar">
+
+              <div class="terminal-heading">
+
+                <div class="terminal-dots"
+                     aria-hidden="true">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+
+                <strong>HTTP Response</strong>
+
+              </div>
+
+              <span class="terminal-label">
+                ← SERVER
+              </span>
+
+            </div>
+
+
+            <div class="terminal-content">
+
+              <!-- Status line -->
+
+              <button type="button"
+                      class="wire-line"
+                      data-inspect="status-line">
+
+                <span class="line-number">01</span>
+
+                <span class="line-content">
+                  HTTP/1.1
+                  <span class="syntax-status">200 OK</span>
+                </span>
+
+              </button>
+
+
+              <!-- Header -->
+
+              <button type="button"
+                      class="wire-line"
+                      data-inspect="headers">
+
+                <span class="line-number">02</span>
+
+                <span class="line-content">
+                  <span class="syntax-header">
+                    Content-Type:
+                  </span>
+                  <span class="syntax-value">
+                    application/json
+                  </span>
+                </span>
+
+              </button>
+
+
+              <!-- Razdvajanje -->
+
+              <div class="wire-separator">
+                03 — prazan red
+              </div>
+
+
+              <!-- JSON telo -->
+
+              <button type="button"
+                      class="wire-line"
+                      data-inspect="body">
+
+                <span class="line-number">04</span>
+
+                <span class="line-content syntax-json">
+                  {
+                </span>
+
+              </button>
+
+
+              <button type="button"
+                      class="wire-line"
+                      data-inspect="body">
+
+                <span class="line-number">05</span>
+
+                <span class="line-content">
+                  &nbsp;&nbsp;"id":
+                  <span class="syntax-value">1</span>,
+                </span>
+
+              </button>
+
+
+              <button type="button"
+                      class="wire-line"
+                      data-inspect="body">
+
+                <span class="line-number">06</span>
+
+                <span class="line-content">
+                  &nbsp;&nbsp;"name":
+                  <span class="syntax-string">"Ana"</span>,
+                </span>
+
+              </button>
+
+
+              <button type="button"
+                      class="wire-line"
+                      data-inspect="body">
+
+                <span class="line-number">07</span>
+
+                <span class="line-content">
+                  &nbsp;&nbsp;"age":
+                  <span class="syntax-value">20</span>
+                </span>
+
+              </button>
+
+
+              <button type="button"
+                      class="wire-line"
+                      data-inspect="body">
+
+                <span class="line-number">08</span>
+
+                <span class="line-content syntax-json">
+                  }
+                </span>
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- =============================
+             DUGMAD ZA IZBOR
+             ============================= -->
+
+        <div class="inspector-tabs"
+             id="part-tabs"
+             aria-label="Izaberi deo HTTP poruke">
+
+          <button type="button"
+                  class="inspector-tab active"
+                  data-part="request-line"
+                  aria-pressed="true">
+
+            Početna linija
+
+          </button>
+
+
+          <button type="button"
+                  class="inspector-tab"
+                  data-part="headers"
+                  aria-pressed="false">
+
+            Zaglavlja
+
+          </button>
+
+
+          <button type="button"
+                  class="inspector-tab"
+                  data-part="body"
+                  aria-pressed="false">
+
+            Telo poruke
+
+          </button>
+
+
+          <button type="button"
+                  class="inspector-tab"
+                  data-part="status-line"
+                  aria-pressed="false">
+
+            Statusna linija
+
+          </button>
+
+        </div>
+
+
+        <!-- =============================
+             DINAMIČKO OBJAŠNJENJE
+             ============================= -->
+
+        <div class="inspect-details">
+
+          <div class="details-text"
+               aria-live="polite">
+
+            <span class="details-eyebrow">
+              Analiza elementa
+            </span>
+
+            <h3 id="part-title">
+              Početna linija zahteva
+            </h3>
+
+            <p id="part-description">
+              Sadrži HTTP metodu, putanju do resursa
+              i verziju protokola.
+            </p>
+
+          </div>
+
+
+          <div class="details-example">
+
+            <div class="details-example-label">
+              PRIMER
+            </div>
+
+            <pre id="part-example">GET /users/1 HTTP/1.1</pre>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================
+         04 — REQUEST I RESPONSE
+         ================================= -->
+
+    <section class="anatomy-section"
+             aria-labelledby="anatomy-title">
+
+      <div class="section-heading">
+
+        <span class="section-label">
+          Dve vrste HTTP poruka
+        </span>
+
+        <h2 id="anatomy-title">
+          Request
+          <span class="gradient-text">vs.</span>
+          Response
+        </h2>
+
+        <p>
+          Zahtev i odgovor imaju sličnu strukturu,
+          ali njihove početne linije
+          i namene se razlikuju.
+        </p>
+
+      </div>
+
+
+      <div class="anatomy-grid">
+
+        <!-- HTTP REQUEST -->
+
+        <article class="glass-card anatomy-card">
+
+          <div class="anatomy-icon">
+
+            <svg viewBox="0 0 24 24"
+                 aria-hidden="true">
+              <path d="M3 12h18"/>
+              <path d="m15 6 6 6-6 6"/>
+              <rect x="2" y="3" width="9"
+                    height="6" rx="2"/>
+            </svg>
+
+          </div>
+
+          <h3>HTTP Request</h3>
+
+          <p>
+            Poruka koju klijent šalje serveru
+            kako bi zatražio resurs ili izvršenje
+            određene operacije.
+          </p>
+
+          <div class="anatomy-list">
+
+            <div class="anatomy-item">
+              <span>01</span>
+              <div>
+                <strong>Request Line</strong>
+                — metoda, cilj zahteva i verzija.
+              </div>
+            </div>
+
+            <div class="anatomy-item">
+              <span>02</span>
+              <div>
+                <strong>Headers</strong>
+                — dodatne informacije o zahtevu.
+              </div>
+            </div>
+
+            <div class="anatomy-item">
+              <span>03</span>
+              <div>
+                <strong>Body</strong>
+                — opcioni podaci koje klijent šalje.
+              </div>
+            </div>
+
+          </div>
+
+        </article>
+
+
+        <!-- HTTP RESPONSE -->
+
+        <article class="glass-card anatomy-card">
+
+          <div class="anatomy-icon">
+
+            <svg viewBox="0 0 24 24"
+                 aria-hidden="true">
+              <path d="M21 12H3"/>
+              <path d="m9 6-6 6 6 6"/>
+              <rect x="13" y="3" width="9"
+                    height="6" rx="2"/>
+            </svg>
+
+          </div>
+
+          <h3>HTTP Response</h3>
+
+          <p>
+            Poruka kojom server obaveštava
+            klijenta o ishodu obrade zahteva
+            i po potrebi vraća sadržaj.
+          </p>
+
+          <div class="anatomy-list">
+
+            <div class="anatomy-item">
+              <span>01</span>
+              <div>
+                <strong>Status Line</strong>
+                — verzija, statusni kod i opis.
+              </div>
+            </div>
+
+            <div class="anatomy-item">
+              <span>02</span>
+              <div>
+                <strong>Headers</strong>
+                — metapodaci o odgovoru.
+              </div>
+            </div>
+
+            <div class="anatomy-item">
+              <span>03</span>
+              <div>
+                <strong>Body</strong>
+                — opcioni sadržaj koji server vraća.
+              </div>
+            </div>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================
+         05 — ZAŠTO POSTOJI PRAZAN RED
+         ================================= -->
+
+    <section class="separator-section"
+             aria-labelledby="separator-title">
+
+      <div class="glass-card separator-card">
+
+        <div>
+
+          <span class="section-label">
+            Tehnički detalj
+          </span>
+
+          <h2 id="separator-title">
+            Čemu služi
+            <span class="gradient-text">prazan red?</span>
+          </h2>
+
+          <p>
+            U HTTP/1.1 porukama zaglavlja se
+            završavaju praznim redom, odnosno
+            sekvencom <strong>CRLF CRLF</strong>.
+
+            Na taj način razdvajaju se zaglavlja
+            od eventualnog tela poruke.
+          </p>
+
+          <p style="margin-top:13px">
+            Ako telo postoji, ono počinje nakon
+            tog razdvajanja. Pravila za određivanje
+            dužine tela zavise od konkretne poruke
+            i njenih zaglavlja.
+          </p>
+
+        </div>
+
+
+        <div class="separator-code"
+             aria-label="Primer HTTP poruke sa razdvajanjem zaglavlja i tela">
+
+          <span class="line" style="color:#ffac32">
+            HTTP/1.1 200 OK
+          </span>
+
+          <span class="line" style="color:#d8c09b">
+            Content-Type: text/plain
+          </span>
+
+          <span class="line" style="color:#d8c09b">
+            Content-Length: 5
+          </span>
+
+          <span class="emphasis">
+            ↳ CRLF — prazan red
+          </span>
+
+          <span class="line" style="color:#a0d8a8">
+            Hello
+          </span>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================
+         06 — VAŽNE INFORMACIJE
+         ================================= -->
+
+    <section class="facts-section"
+             aria-labelledby="facts-title">
+
+      <div class="section-heading">
+
+        <span class="section-label">
+          Važne činjenice
+        </span>
+
+        <h2 id="facts-title">
+          Šta treba
+          <span class="gradient-text">zapamtiti?</span>
+        </h2>
+
+      </div>
+
+
+      <div class="facts-grid">
+
+        <article class="fact-card">
+
+          <span class="fact-number">GET</span>
+
+          <h3>Metoda zahteva</h3>
+
+          <p>
+            Metoda opisuje nameravanu
+            operaciju nad resursom.
+          </p>
+
+        </article>
+
+
+        <article class="fact-card">
+
+          <span class="fact-number">200</span>
+
+          <h3>Statusni kod</h3>
+
+          <p>
+            Broj koji označava
+            rezultat obrade HTTP zahteva.
+          </p>
+
+        </article>
+
+
+        <article class="fact-card">
+
+          <span class="fact-number">{ }</span>
+
+          <h3>Telo poruke</h3>
+
+          <p>
+            Može sadržati JSON, HTML,
+            sliku ili druge podatke.
+          </p>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================
+         07 — ZAKLJUČAK
+         ================================= -->
+
+    <section class="message-summary">
+
+      <div class="glass-card">
+
+        <span class="section-label">
+          Zapamti
+        </span>
+
+        <h2>
+          HTTP poruka ima
+          <span class="gradient-text">jasnu strukturu.</span>
+        </h2>
+
+        <p>
+          Početna linija govori šta se traži
+          ili kakav je rezultat zahteva.
+
+          Zaglavlja pružaju dodatne informacije,
+          a telo poruke prenosi sadržaj kada postoji.
+
+          Razumevanje ove strukture pomaže nam da
+          analiziramo komunikaciju između browsera
+          i servera.
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- NAVIGACIJA -->
+
+    <div id="lesson-navigation"></div>
+
+  </main>
+
+  <div id="site-footer"></div>
+
+
+  <!-- =================================
+       08 — DODATNA INTERAKCIJA
+       ================================= -->
+
+  <script>
+    (() => {
+      "use strict";
+
+      const tabs = document.getElementById("part-tabs");
+
+      if (!tabs) return;
+
+      const lines = document.querySelectorAll(
+        ".wire-line[data-inspect]"
+      );
+
+      /*
+       * Zajednički script.js već ažurira
+       * naziv, objašnjenje i primer poruke.
+       *
+       * Ova funkcija dodatno osvetljava
+       * odgovarajuće linije u terminalima.
+       */
+
+      function highlightPart(part) {
+
+        lines.forEach(line => {
+
+          const selected =
+            line.dataset.inspect === part;
+
+          line.classList.toggle(
+            "selected",
+            selected
+          );
+
+          line.setAttribute(
+            "aria-pressed",
+            String(selected)
+          );
+
+        });
+
+      }
+
+      /*
+       * Klik na dugme:
+       * - globalni JS ažurira objašnjenje
+       * - ovaj JS ažurira osvetljenje
+       */
+
+      tabs.addEventListener("click", event => {
+
+        const button = event.target.closest(
+          "[data-part]"
+        );
+
+        if (!button) return;
+
+        highlightPart(button.dataset.part);
+
+      });
+
+      /*
+       * Klik direktno na red HTTP poruke
+       * aktivira odgovarajuću karticu.
+       */
+
+      lines.forEach(line => {
+
+        line.addEventListener("click", () => {
+
+          const part = line.dataset.inspect;
+
+          const tab = Array.from(
+            tabs.querySelectorAll("[data-part]")
+          ).find(button => {
+            return button.dataset.part === part;
+          });
+
+          if (tab) {
+            tab.click();
+          }
+
+        });
+
+      });
+
+      highlightPart("request-line");
+
+    })();
+  </script>
+
+</body>
+</html>

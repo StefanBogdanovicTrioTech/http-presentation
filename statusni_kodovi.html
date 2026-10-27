@@ -1,0 +1,1897 @@
+
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#08090c">
+
+  <meta name="description"
+        content="Interaktivni vodič kroz HTTP statusne kodove: 1xx, 2xx, 3xx, 4xx i 5xx.">
+
+  <title>Statusni kodovi | HTTP Protokol</title>
+  <link rel="icon" type="image/png" href="./slike/ikonica.png">
+  
+
+  <link rel="stylesheet" href="style.css">
+
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+
+    /* =====================================
+       01 — UVOD
+       ===================================== */
+
+    .status-hero {
+      max-width: 950px;
+      margin: 0 auto 55px;
+      text-align: center;
+    }
+
+    .status-hero h1 {
+      margin: 17px 0 22px;
+      font-size: clamp(2.8rem, 5vw, 5.1rem);
+      line-height: 1.12;
+      letter-spacing: -2px;
+      font-weight: 900;
+    }
+
+    .status-hero p {
+      max-width: 750px;
+      margin: auto;
+      color: var(--muted);
+      font-size: 1.12rem;
+      line-height: 1.85;
+    }
+
+    .status-hero strong {
+      color: var(--white);
+    }
+
+    /* =====================================
+       02 — PET KATEGORIJA
+       ===================================== */
+
+    .category-section {
+      margin-bottom: 85px;
+    }
+
+    .section-heading {
+      text-align: center;
+      margin-bottom: 33px;
+    }
+
+    .section-heading h2 {
+      margin: 13px 0;
+      font-size: clamp(1.9rem, 3.2vw, 2.8rem);
+      line-height: 1.25;
+    }
+
+    .section-heading p {
+      max-width: 720px;
+      margin: auto;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 13px;
+    }
+
+    .category-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 190px;
+      padding: 23px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 175, 50, 0.17);
+      background: rgba(23, 24, 29, 0.75);
+      text-align: center;
+      backdrop-filter: blur(18px);
+      transition:
+        transform 0.3s,
+        border-color 0.3s,
+        box-shadow 0.3s;
+    }
+
+    .category-card::before {
+      content: "";
+      position: absolute;
+      inset: -60%;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        var(--category-glow, rgba(255, 121, 0, 0.1)),
+        transparent 65%
+      );
+      opacity: 0.3;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+
+    .category-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--category-color);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+    }
+
+    .category-card:hover::before {
+      opacity: 0.8;
+    }
+
+    .category-number {
+      position: relative;
+      display: block;
+      margin-bottom: 12px;
+      font-family: Consolas, monospace;
+      font-size: clamp(1.6rem, 2.6vw, 2.5rem);
+      line-height: 1.2;
+      font-weight: 900;
+      color: var(--category-color);
+    }
+
+    .category-card h3 {
+      position: relative;
+      font-size: 0.98rem;
+      margin-bottom: 8px;
+    }
+
+    .category-card p {
+      position: relative;
+      color: var(--muted);
+      font-size: 0.79rem;
+      line-height: 1.6;
+    }
+
+    .category-1 {
+      --category-color: #73b9ff;
+      --category-glow: rgba(115,185,255,0.25);
+    }
+
+    .category-2 {
+      --category-color: #52dca1;
+      --category-glow: rgba(82,220,161,0.24);
+    }
+
+    .category-3 {
+      --category-color: #e5c500;
+      --category-glow: rgba(229,197,0,0.23);
+    }
+
+    .category-4 {
+      --category-color: #ff973f;
+      --category-glow: rgba(255,151,63,0.25);
+    }
+
+    .category-5 {
+      --category-color: #ff6474;
+      --category-glow: rgba(255,100,116,0.24);
+    }
+
+    /* =====================================
+       03 — INTERAKTIVNI STATUS EXPLORER
+       ===================================== */
+
+    .explorer {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      padding: 29px;
+      border-radius: 29px;
+      background: rgba(15, 17, 23, 0.85);
+      border: 1px solid rgba(255, 170, 45, 0.27);
+      backdrop-filter: blur(24px);
+      box-shadow:
+        0 25px 65px rgba(0, 0, 0, 0.30),
+        0 0 48px rgba(255, 121, 0, 0.045);
+    }
+
+    .explorer::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      width: 460px;
+      height: 460px;
+      right: -230px;
+      top: -240px;
+      border-radius: 50%;
+      background: rgba(255, 121, 0, 0.11);
+      filter: blur(70px);
+      pointer-events: none;
+    }
+
+    .explorer-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 25px;
+    }
+
+    .explorer-top h3 {
+      font-size: 1.45rem;
+      margin-bottom: 5px;
+    }
+
+    .explorer-top p {
+      color: var(--muted);
+      font-size: 0.89rem;
+    }
+
+    .explorer-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 15px;
+      border: 1px solid var(--glass-border);
+      border-radius: 99px;
+      background: rgba(255,121,0,0.07);
+      color: var(--gold-light);
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
+
+    .explorer-label::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: var(--orange-light);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--orange);
+    }
+
+    /* =====================================
+       04 — FILTERI
+       ===================================== */
+
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-bottom: 25px;
+    }
+
+    .filter-button {
+      min-height: 43px;
+      padding: 10px 16px;
+      border-radius: 11px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+      font-family: Consolas, monospace;
+      font-size: 0.84rem;
+      font-weight: 800;
+      transition: all 0.25s;
+    }
+
+    .filter-button:hover {
+      color: var(--white);
+      border-color: var(--orange-light);
+    }
+
+    .filter-button.active {
+      background: var(--gradient);
+      border-color: var(--orange-light);
+      color: #17110a;
+    }
+
+    /* =====================================
+       05 — STATUS KODOVI
+       ===================================== */
+
+    .status-group {
+      margin-bottom: 22px;
+    }
+
+    .status-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .status-group h4 {
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 0.81rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .status-buttons {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0,1fr));
+      gap: 10px;
+    }
+
+    .status-option {
+      min-height: 76px;
+      padding: 13px 9px;
+      border: 1px solid rgba(255,255,255,0.11);
+      border-radius: 13px;
+      background: rgba(255,255,255,0.035);
+      text-align: center;
+      transition:
+        transform 0.25s,
+        border-color 0.25s,
+        background 0.25s;
+    }
+
+    .status-option:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255,171,49,0.55);
+      background: rgba(255,121,0,0.08);
+    }
+
+    .status-option.active {
+      border-color: var(--orange-light);
+      background: rgba(255,121,0,0.14);
+      box-shadow:
+        inset 0 0 16px rgba(255,121,0,0.05),
+        0 0 17px rgba(255,121,0,0.08);
+    }
+
+    .status-option strong {
+      display: block;
+      color: var(--orange-light);
+      font-family: Consolas, monospace;
+      font-size: 1.5rem;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+
+    .status-option small {
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 0.69rem;
+      line-height: 1.4;
+    }
+
+    .status-option.active small {
+      color: var(--white);
+    }
+
+    /* =====================================
+       06 — DETALJI IZABRANOG STATUSA
+       ===================================== */
+
+    .status-details {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 23px;
+      margin-top: 30px;
+      padding-top: 28px;
+      border-top: 1px solid rgba(255,255,255,0.09);
+    }
+
+    .status-info {
+      min-width: 0;
+      padding: 24px;
+      border-radius: 18px;
+      background: rgba(255,121,0,0.045);
+      border: 1px solid rgba(255,171,49,0.15);
+    }
+
+    .status-info-label {
+      color: var(--orange-light);
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .selected-status {
+      display: inline-flex;
+      align-items: center;
+      margin: 18px 0;
+      padding: 10px 17px;
+      border-radius: 11px;
+      background: rgba(255,121,0,0.12);
+      border: 1px solid rgba(255,171,49,0.25);
+      color: var(--orange-light);
+      font: 800 1.13rem Consolas, monospace;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
+
+    .status-info h3 {
+      font-size: 1.5rem;
+      line-height: 1.3;
+      margin-bottom: 12px;
+    }
+
+    .status-info p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.85;
+    }
+
+    .status-example {
+      margin-top: 22px;
+      padding: 16px;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.20);
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .status-example strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--gold-light);
+      font-size: 0.81rem;
+    }
+
+    .status-example p {
+      font-size: 0.87rem;
+    }
+
+    /* =====================================
+       07 — SIMULIRANI BROWSER
+       ===================================== */
+
+    .status-browser {
+      min-width: 0;
+      overflow: hidden;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.13);
+      background: #0b0d12;
+      box-shadow: 0 20px 45px rgba(0,0,0,0.3);
+    }
+
+    .browser-toolbar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 13px 16px;
+      background: #1b1d23;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .browser-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .browser-dots span {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+    }
+
+    .browser-dots span:nth-child(1) {
+      background: #ff6259;
+    }
+
+    .browser-dots span:nth-child(2) {
+      background: #ffbd2e;
+    }
+
+    .browser-dots span:nth-child(3) {
+      background: #28c840;
+    }
+
+    .browser-address {
+      flex: 1;
+      min-width: 0;
+      padding: 7px 11px;
+      border-radius: 7px;
+      background: rgba(0,0,0,0.29);
+      color: var(--muted);
+      font: 0.77rem Consolas,monospace;
+      overflow-wrap: anywhere;
+    }
+
+    .browser-preview {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 12px;
+      min-height: 280px;
+      padding: 28px 24px;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .browser-preview::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: rgba(255,121,0,0.12);
+      filter: blur(65px);
+    }
+
+    .preview-symbol {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: 92px;
+      height: 92px;
+      margin-bottom: 5px;
+      border-radius: 50%;
+      border: 2px solid var(--orange-light);
+      box-shadow:
+        0 0 25px rgba(255,121,0,0.20),
+        inset 0 0 24px rgba(255,121,0,0.09);
+      background: rgba(255,121,0,0.045);
+      color: var(--orange-light);
+      font-family: Consolas,monospace;
+      font-size: 2rem;
+      font-weight: 900;
+      transition: all 0.3s;
+    }
+
+    .browser-preview[data-category="1"] .preview-symbol {
+      color: #73b9ff;
+      border-color: #73b9ff;
+    }
+
+    .browser-preview[data-category="2"] .preview-symbol {
+      color: #52dca1;
+      border-color: #52dca1;
+    }
+
+    .browser-preview[data-category="3"] .preview-symbol {
+      color: #e5c500;
+      border-color: #e5c500;
+    }
+
+    .browser-preview[data-category="4"] .preview-symbol {
+      color: #ff973f;
+      border-color: #ff973f;
+    }
+
+    .browser-preview[data-category="5"] .preview-symbol {
+      color: #ff6474;
+      border-color: #ff6474;
+    }
+
+    .browser-preview h3 {
+      font-size: 1.45rem;
+    }
+
+    .browser-preview p {
+      max-width: 330px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.7;
+    }
+
+    /* =====================================
+       08 — SIMULIRANI HTTP RESPONSE
+       ===================================== */
+
+    .raw-response {
+      margin-top: 19px;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #090b0f;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .raw-response-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 12px 17px;
+      background: rgba(255,255,255,0.055);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .raw-response-header strong {
+      font-size: 0.89rem;
+    }
+
+    .raw-response-header span {
+      color: var(--orange-light);
+      font-family: Consolas,monospace;
+      font-size: 0.74rem;
+    }
+
+    .raw-response pre {
+      min-height: 115px;
+      max-height: 280px;
+      padding: 21px;
+      overflow: auto;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      color: #edcc98;
+      font: 0.88rem/1.8 Consolas,monospace;
+    }
+
+    .response-disclaimer {
+      margin-top: 13px;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    /* =====================================
+       09 — STATUSNI KODOVI U PRAKSI
+       ===================================== */
+
+    .practice-section {
+      margin-top: 90px;
+    }
+
+    .practice-grid {
+      display: grid;
+      grid-template-columns: repeat(3,minmax(0,1fr));
+      gap: 20px;
+    }
+
+    .practice-card {
+      min-height: 240px;
+    }
+
+    .practice-number {
+      display: block;
+      margin-bottom: 14px;
+      color: var(--orange-light);
+      font-family: Consolas,monospace;
+      font-size: 1.8rem;
+      font-weight: 900;
+    }
+
+    .practice-card h3 {
+      margin-bottom: 11px;
+      font-size: 1.14rem;
+    }
+
+    .practice-card p {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.8;
+    }
+
+    /* =====================================
+       10 — ZAKLJUČAK
+       ===================================== */
+
+    .status-summary {
+      margin-top: 85px;
+      text-align: center;
+    }
+
+    .status-summary h2 {
+      margin: 13px 0 19px;
+      font-size: clamp(1.8rem,3vw,2.7rem);
+    }
+
+    .status-summary p {
+      max-width: 810px;
+      margin: auto;
+      color: var(--muted);
+      line-height: 1.85;
+    }
+
+    .summary-codes {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 26px;
+    }
+
+    .summary-codes span {
+      border-radius: 12px;
+      padding: 10px 16px;
+      background: rgba(255,121,0,0.075);
+      border: 1px solid var(--glass-border);
+      color: var(--gold-light);
+      font: 800 0.88rem Consolas,monospace;
+    }
+
+    /* =====================================
+       11 — RESPONSIVE
+       ===================================== */
+
+    @media (max-width: 1050px) {
+      .category-grid {
+        grid-template-columns: repeat(3,minmax(0,1fr));
+      }
+
+      .status-buttons {
+        grid-template-columns: repeat(4,minmax(0,1fr));
+      }
+    }
+
+    @media (max-width: 850px) {
+      .status-details {
+        grid-template-columns: 1fr;
+      }
+
+      .practice-grid {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+      }
+    }
+
+    @media (max-width: 650px) {
+      .category-grid {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+      }
+
+      .category-card {
+        min-height: 155px;
+        padding: 19px 10px;
+      }
+
+      .category-number {
+        font-size: 1.8rem;
+      }
+
+      .explorer {
+        padding: 16px;
+        border-radius: 21px;
+      }
+
+      .status-buttons {
+        grid-template-columns: repeat(3,minmax(0,1fr));
+        gap: 8px;
+      }
+
+      .status-option {
+        min-height: 70px;
+      }
+
+      .status-option strong {
+        font-size: 1.25rem;
+      }
+
+      .status-option small {
+        font-size: 0.64rem;
+      }
+
+      .status-info {
+        padding: 19px;
+      }
+
+      .filter-button {
+        flex: 1;
+      }
+
+      .practice-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .category-section,
+      .practice-section,
+      .status-summary {
+        margin-top: 65px;
+        margin-bottom: 65px;
+      }
+    }
+
+  </style>
+
+  <script src="script.js" defer></script>
+</head>
+
+<body>
+
+  <!-- GLOBALNA POZADINA I HEADER -->
+
+  <div id="site-background" aria-hidden="true"></div>
+  <div id="site-header"></div>
+
+  <main class="page-shell lesson-page">
+
+    <!-- ===================================
+         01 — HERO
+         =================================== -->
+
+    <section class="status-hero">
+
+      <span class="section-label">
+        06 / 10 — HTTP odgovori
+      </span>
+
+      <h1>
+        Svaki odgovor
+        <span class="gradient-text">ima svoj kod.</span>
+      </h1>
+
+      <p>
+        Kada server primi HTTP zahtev,
+        vraća odgovor sa <strong>troznamenkastim
+        statusnim kodom</strong>.
+
+        Taj kod govori klijentu da li je
+        zahtev uspešan, da li je potrebno
+        preusmeravanje ili je došlo do problema.
+      </p>
+
+    </section>
+
+
+    <!-- ===================================
+         02 — PET KATEGORIJA
+         =================================== -->
+
+    <section class="category-section"
+             aria-labelledby="categories-title">
+
+      <div class="section-heading">
+
+        <span class="section-label">
+          Klasifikacija
+        </span>
+
+        <h2 id="categories-title">
+          Pet grupa
+          <span class="gradient-text">HTTP statusa.</span>
+        </h2>
+
+        <p>
+          Prva cifra statusnog koda
+          određuje kojoj grupi pripada odgovor.
+        </p>
+
+      </div>
+
+
+      <div class="category-grid">
+
+        <!-- 1XX -->
+
+        <article class="category-card category-1">
+
+          <span class="category-number">1xx</span>
+
+          <h3>Informacije</h3>
+
+          <p>
+            Privremeni odgovor.
+            Obrada zahteva se nastavlja.
+          </p>
+
+        </article>
+
+
+        <!-- 2XX -->
+
+        <article class="category-card category-2">
+
+          <span class="category-number">2xx</span>
+
+          <h3>Uspeh</h3>
+
+          <p>
+            Zahtev je uspešno primljen
+            i obrađen.
+          </p>
+
+        </article>
+
+
+        <!-- 3XX -->
+
+        <article class="category-card category-3">
+
+          <span class="category-number">3xx</span>
+
+          <h3>Preusmeravanje</h3>
+
+          <p>
+            Potrebno je dodatno postupanje,
+            poput korišćenja druge adrese ili keša.
+          </p>
+
+        </article>
+
+
+        <!-- 4XX -->
+
+        <article class="category-card category-4">
+
+          <span class="category-number">4xx</span>
+
+          <h3>Greška klijenta</h3>
+
+          <p>
+            Problem sa zahtevom
+            ili pristupom resursu.
+          </p>
+
+        </article>
+
+
+        <!-- 5XX -->
+
+        <article class="category-card category-5">
+
+          <span class="category-number">5xx</span>
+
+          <h3>Greška servera</h3>
+
+          <p>
+            Server nije uspeo
+            da ispuni zahtev.
+          </p>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================
+         03 — STATUS CODE EXPLORER
+         =================================== -->
+
+    <section aria-labelledby="explorer-title">
+
+      <div class="section-heading">
+
+        <span class="section-label">
+          Interaktivna demonstracija
+        </span>
+
+        <h2 id="explorer-title">
+          HTTP Status
+          <span class="gradient-text">Code Explorer.</span>
+        </h2>
+
+        <p>
+          Izaberi kategoriju, zatim klikni na
+          statusni kod da istražiš njegovo značenje.
+        </p>
+
+      </div>
+
+
+      <div class="explorer">
+
+        <div class="explorer-top">
+
+          <div>
+            <h3>Biblioteka HTTP odgovora</h3>
+            <p>15 statusnih kodova · 5 kategorija</p>
+          </div>
+
+          <span class="explorer-label">
+            INTERACTIVE EXPLORER
+          </span>
+
+        </div>
+
+
+        <!-- =================================
+             FILTERI PO KATEGORIJAMA
+             ================================= -->
+
+        <div class="filter-bar"
+             id="status-filters"
+             aria-label="Filter statusnih kodova">
+
+          <button type="button"
+                  class="filter-button active"
+                  data-filter="all"
+                  aria-pressed="true">
+            Svi
+          </button>
+
+          <button type="button"
+                  class="filter-button"
+                  data-filter="1"
+                  aria-pressed="false">
+            1xx
+          </button>
+
+          <button type="button"
+                  class="filter-button"
+                  data-filter="2"
+                  aria-pressed="false">
+            2xx
+          </button>
+
+          <button type="button"
+                  class="filter-button"
+                  data-filter="3"
+                  aria-pressed="false">
+            3xx
+          </button>
+
+          <button type="button"
+                  class="filter-button"
+                  data-filter="4"
+                  aria-pressed="false">
+            4xx
+          </button>
+
+          <button type="button"
+                  class="filter-button"
+                  data-filter="5"
+                  aria-pressed="false">
+            5xx
+          </button>
+
+        </div>
+
+
+        <!-- =================================
+             SVI STATUSNI KODOVI
+             ================================= -->
+
+        <div id="status-grid">
+
+          <!-- 1XX -->
+
+          <section class="status-group" data-group="1">
+
+            <h4>1xx — Informativni odgovori</h4>
+
+            <div class="status-buttons">
+
+              <button type="button"
+                      class="status-option"
+                      data-status="100">
+                <strong>100</strong>
+                <small>Continue</small>
+              </button>
+
+            </div>
+
+          </section>
+
+
+          <!-- 2XX -->
+
+          <section class="status-group" data-group="2">
+
+            <h4>2xx — Uspešni zahtevi</h4>
+
+            <div class="status-buttons">
+
+              <button type="button"
+                      class="status-option active"
+                      data-status="200">
+                <strong>200</strong>
+                <small>OK</small>
+              </button>
+
+              <button type="button"
+                      class="status-option"
+                      data-status="201">
+                <strong>201</strong>
+                <small>Created</small>
+              </button>
+
+              <button type="button"
+                      class="status-option"
+                      data-status="204">
+                <strong>204</strong>
+                <small>No Content</small>
+              </button>
+
+            </div>
+
+          </section>
+
+
+          <!-- 3XX -->
+
+          <section class="status-group" data-group="3">
+
+            <h4>3xx — Preusmeravanja i keširanje</h4>
+
+            <div class="status-buttons">
+
+              <button type="button"
+                      class="status-option"
+                      data-status="301">
+                <strong>301</strong>
+                <small>Moved Permanently</small>
+              </button>
+
+              <button type="button"
+                      class="status-option"
+                      data-status="302">
+                <strong>302</strong>
+                <small>Found</small>
+              </button>
+
+              <button type="button"
+                      class="status-option"
+                      data-status="304">
+                <strong>304</strong>
+                <small>Not Modified</small>
+              </button>
+
+            </div>
+
+          </section>
+
+
+          <!-- 4XX -->
+
+          <section class="status-group" data-group="4">
+
+            <h4>4xx — Problemi sa zahtevom</h4>
+
+            <div class="status-buttons">
+
+              <button type="button"
+                      class="status-option"
+                      data-status="400">
+                <strong>400</strong>
+                <small>Bad Request</small>
+              </button>
+
+              <button type="button"
+                      class="status-option"
+                      data-status="401">
+                <strong>401</strong>
+                <small>Unauthorized</small>
+              </button>
+
+              <button type="button"
+                      class="status-option"
+                      data-status="403">
+                <strong>403</strong>
+                <small>Forbidden</small>
+              </button>
+
+              <button type="button"
+                      class="status-option"
+                      data-status="404">
+                <strong>404</strong>
+                <small>Not Found</small>
+              </button>
+
+              <button type="button"
+                      class="status-option"
+                      data-status="429">
+                <strong>429</strong>
+                <small>Too Many Requests</small>
+              </button>
+
+            </div>
+
+          </section>
+
+
+          <!-- 5XX -->
+
+          <section class="status-group" data-group="5">
+
+            <h4>5xx — Problemi na serveru</h4>
+
+            <div class="status-buttons">
+
+              <button type="button"
+                      class="status-option"
+                      data-status="500">
+                <strong>500</strong>
+                <small>Internal Server Error</small>
+              </button>
+
+              <button type="button"
+                      class="status-option"
+                      data-status="502">
+                <strong>502</strong>
+                <small>Bad Gateway</small>
+              </button>
+
+              <button type="button"
+                      class="status-option"
+                      data-status="503">
+                <strong>503</strong>
+                <small>Service Unavailable</small>
+              </button>
+
+            </div>
+
+          </section>
+
+        </div>
+
+
+        <!-- =================================
+             DETALJI IZABRANOG STATUSA
+             ================================= -->
+
+        <div class="status-details">
+
+          <!-- OBJAŠNJENJE -->
+
+          <div class="status-info"
+               aria-live="polite">
+
+            <span class="status-info-label">
+              Odabrani statusni kod
+            </span>
+
+            <div>
+              <span class="selected-status"
+                    id="status-badge">
+                200 OK
+              </span>
+            </div>
+
+            <h3 id="status-title">
+              OK
+            </h3>
+
+            <p id="status-description">
+              Zahtev je uspešno obrađen.
+            </p>
+
+            <div class="status-example">
+
+              <strong>PRIMER IZ PRAKSE</strong>
+
+              <p id="status-example">
+                Uspešno otvaranje web stranice.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <!-- SIMULIRANI BROWSER -->
+
+          <div class="status-browser">
+
+            <div class="browser-toolbar">
+
+              <div class="browser-dots"
+                   aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+
+              <div class="browser-address"
+                   id="preview-address">
+                https://example.com/
+              </div>
+
+            </div>
+
+
+            <div class="browser-preview"
+                 id="status-preview"
+                 data-category="2"
+                 aria-live="polite">
+
+              <div class="preview-symbol"
+                   id="preview-symbol">
+                ✓
+              </div>
+
+              <h3 id="preview-heading">
+                Uspešno!
+              </h3>
+
+              <p id="preview-message">
+                Server je uspešno odgovorio na zahtev.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================
+             SIROVI HTTP ODGOVOR
+             ================================= -->
+
+        <div class="raw-response">
+
+          <div class="raw-response-header">
+
+            <strong>Simulirani HTTP Response</strong>
+
+            <span>HTTP/1.1</span>
+
+          </div>
+
+          <pre id="status-raw-response"
+               aria-live="polite">HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "message": "Success"
+}</pre>
+
+        </div>
+
+        <p class="response-disclaimer">
+          Prikaz je edukativna simulacija. Izbor statusa
+          ne šalje stvarni HTTP zahtev i ne menja
+          HTTP status same stranice.
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================
+         04 — PRIMERI IZ PRAKSE
+         =================================== -->
+
+    <section class="practice-section"
+             aria-labelledby="practice-title">
+
+      <div class="section-heading">
+
+        <span class="section-label">
+          Najpoznatiji odgovori
+        </span>
+
+        <h2 id="practice-title">
+          Statusni kodovi koje
+          <span class="gradient-text">najčešće srećemo.</span>
+        </h2>
+
+        <p>
+          Ovi kodovi predstavljaju neke
+          od najprepoznatljivijih HTTP odgovora.
+        </p>
+
+      </div>
+
+
+      <div class="practice-grid">
+
+        <article class="glass-card practice-card">
+
+          <span class="practice-number"
+                style="color:#52dca1">
+            200
+          </span>
+
+          <h3>OK</h3>
+
+          <p>
+            Uspešno preuzimanje stranice,
+            slike ili JSON podataka.
+          </p>
+
+        </article>
+
+
+        <article class="glass-card practice-card">
+
+          <span class="practice-number"
+                style="color:#e5c500">
+            301
+          </span>
+
+          <h3>Moved Permanently</h3>
+
+          <p>
+            Server javlja da je resurs trajno
+            premešten na novu adresu.
+          </p>
+
+        </article>
+
+
+        <article class="glass-card practice-card">
+
+          <span class="practice-number"
+                style="color:#ff973f">
+            404
+          </span>
+
+          <h3>Not Found</h3>
+
+          <p>
+            Tražena stranica ili drugi resurs
+            nije pronađen.
+          </p>
+
+        </article>
+
+
+        <article class="glass-card practice-card">
+
+          <span class="practice-number"
+                style="color:#ff6474">
+            500
+          </span>
+
+          <h3>Internal Server Error</h3>
+
+          <p>
+            Neočekivana greška na serveru
+            sprečila je obradu zahteva.
+          </p>
+
+        </article>
+
+
+        <article class="glass-card practice-card">
+
+          <span class="practice-number"
+                style="color:#ff973f">
+            403
+          </span>
+
+          <h3>Forbidden</h3>
+
+          <p>
+            Server razume zahtev,
+            ali odbija da omogući pristup.
+          </p>
+
+        </article>
+
+
+        <article class="glass-card practice-card">
+
+          <span class="practice-number"
+                style="color:#ff6474">
+            503
+          </span>
+
+          <h3>Service Unavailable</h3>
+
+          <p>
+            Server trenutno ne može da obradi
+            zahtev, na primer tokom održavanja.
+          </p>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================
+         05 — ZAKLJUČAK
+         =================================== -->
+
+    <section class="status-summary">
+
+      <div class="glass-card">
+
+        <span class="section-label">
+          Zapamti
+        </span>
+
+        <h2>
+          Prva cifra otkriva
+          <span class="gradient-text">vrstu odgovora.</span>
+        </h2>
+
+        <p>
+          Statusni kodovi omogućavaju klijentima
+          da razumeju rezultat HTTP zahteva.
+
+          Pored uspešnih odgovora, postoje
+          informativni odgovori, preusmeravanja,
+          greške povezane sa zahtevom
+          i greške na strani servera.
+        </p>
+
+        <div class="summary-codes">
+          <span>1xx — Info</span>
+          <span>2xx — Success</span>
+          <span>3xx — Redirect</span>
+          <span>4xx — Client Error</span>
+          <span>5xx — Server Error</span>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- NAVIGACIJA -->
+
+    <div id="lesson-navigation"></div>
+
+  </main>
+
+  <div id="site-footer"></div>
+
+
+  <!-- ===================================
+       06 — JAVASCRIPT ZA STATUS EXPLORER
+       =================================== -->
+
+  <script>
+    (() => {
+      "use strict";
+
+      /*
+       * Zajednički script.js već obrađuje
+       * izbor statusnog koda i menja:
+       *
+       * status-title
+       * status-description
+       * status-example
+       * status-badge
+       *
+       * Ovaj skript dodaje:
+       * - filtriranje po kategorijama
+       * - vizuelni browser preview
+       * - simulirane HTTP/1.1 odgovore
+       */
+
+      const previewData = {
+
+        100: {
+          symbol: "···",
+          heading: "Nastavi slanje",
+          message:
+            "Server je prihvatio početni deo zahteva. " +
+            "Klijent može da nastavi sa slanjem.",
+          url: "/upload",
+          raw:
+            "HTTP/1.1 100 Continue\n\n" +
+            "(Privremeni odgovor — bez tela)"
+        },
+
+        200: {
+          symbol: "✓",
+          heading: "Uspešno!",
+          message:
+            "Server je uspešno obradio zahtev.",
+          url: "/api/users/1",
+          raw:
+            "HTTP/1.1 200 OK\n" +
+            "Content-Type: application/json\n\n" +
+            '{ "id": 1, "name": "Ana" }'
+        },
+
+        201: {
+          symbol: "+",
+          heading: "Resurs je kreiran",
+          message:
+            "Novi resurs je uspešno napravljen.",
+          url: "/api/users",
+          raw:
+            "HTTP/1.1 201 Created\n" +
+            "Location: /api/users/3\n" +
+            "Content-Type: application/json\n\n" +
+            '{ "id": 3, "name": "Marko" }'
+        },
+
+        204: {
+          symbol: "✓",
+          heading: "Uspešno, bez sadržaja",
+          message:
+            "Operacija je uspela, ali odgovor nema telo.",
+          url: "/api/users/1",
+          raw:
+            "HTTP/1.1 204 No Content\n\n" +
+            "(Odgovor nema telo)"
+        },
+
+        301: {
+          symbol: "→",
+          heading: "Trajno premešteno",
+          message:
+            "Resurs se trajno nalazi na drugoj adresi.",
+          url: "/stara-stranica",
+          raw:
+            "HTTP/1.1 301 Moved Permanently\n" +
+            "Location: https://example.com/nova-stranica\n\n" +
+            "(Primer preusmeravanja)"
+        },
+
+        302: {
+          symbol: "↗",
+          heading: "Privremena lokacija",
+          message:
+            "Resurs je privremeno dostupan na drugoj adresi.",
+          url: "/prijava",
+          raw:
+            "HTTP/1.1 302 Found\n" +
+            "Location: https://example.com/login\n\n" +
+            "(Primer preusmeravanja)"
+        },
+
+        304: {
+          symbol: "↻",
+          heading: "Nije promenjeno",
+          message:
+            "Prema uslovima zahteva, keširana verzija " +
+            "resursa i dalje može da se koristi.",
+          url: "/style.css",
+          raw:
+            "HTTP/1.1 304 Not Modified\n" +
+            "ETag: \"demo-version-1\"\n\n" +
+            "(Odgovor nema telo)"
+        },
+
+        400: {
+          symbol: "!",
+          heading: "Neispravan zahtev",
+          message:
+            "Server ne može da obradi zahtev " +
+            "zbog greške u njegovom formatu.",
+          url: "/api/users",
+          raw:
+            "HTTP/1.1 400 Bad Request\n" +
+            "Content-Type: application/json\n\n" +
+            '{ "error": "Invalid request" }'
+        },
+
+        401: {
+          symbol: "🔒",
+          heading: "Potrebna autentifikacija",
+          message:
+            "Za pristup ovom resursu potrebni su " +
+            "odgovarajući podaci za autentifikaciju.",
+          url: "/api/profile",
+          raw:
+            "HTTP/1.1 401 Unauthorized\n" +
+            'WWW-Authenticate: Basic realm="Demo"\n\n' +
+            "(Primer zahteva za autentifikaciju)"
+        },
+
+        403: {
+          symbol: "×",
+          heading: "Pristup odbijen",
+          message:
+            "Server razume zahtev, " +
+            "ali ne dozvoljava pristup resursu.",
+          url: "/admin",
+          raw:
+            "HTTP/1.1 403 Forbidden\n" +
+            "Content-Type: text/plain\n\n" +
+            "Access denied"
+        },
+
+        404: {
+          symbol: "?",
+          heading: "Stranica nije pronađena",
+          message:
+            "Server nije pronašao traženi resurs.",
+          url: "/nepostojeca-stranica",
+          raw:
+            "HTTP/1.1 404 Not Found\n" +
+            "Content-Type: text/plain\n\n" +
+            "Resource not found"
+        },
+
+        429: {
+          symbol: "!",
+          heading: "Previše zahteva",
+          message:
+            "Klijent je prekoračio " +
+            "ograničenje broja zahteva.",
+          url: "/api/data",
+          raw:
+            "HTTP/1.1 429 Too Many Requests\n" +
+            "Retry-After: 60\n\n" +
+            "Rate limit exceeded"
+        },
+
+        500: {
+          symbol: "!",
+          heading: "Greška servera",
+          message:
+            "Neočekivana serverska greška " +
+            "sprečila je obradu zahteva.",
+          url: "/api/data",
+          raw:
+            "HTTP/1.1 500 Internal Server Error\n" +
+            "Content-Type: text/plain\n\n" +
+            "Internal server error"
+        },
+
+        502: {
+          symbol: "×",
+          heading: "Neispravan odgovor",
+          message:
+            "Posrednički server dobio je " +
+            "neispravan odgovor od drugog servera.",
+          url: "/api/data",
+          raw:
+            "HTTP/1.1 502 Bad Gateway\n" +
+            "Content-Type: text/plain\n\n" +
+            "Bad gateway"
+        },
+
+        503: {
+          symbol: "⏳",
+          heading: "Servis nije dostupan",
+          message:
+            "Server privremeno ne može da obradi zahtev.",
+          url: "/api/data",
+          raw:
+            "HTTP/1.1 503 Service Unavailable\n" +
+            "Retry-After: 120\n\n" +
+            "Service temporarily unavailable"
+        }
+
+      };
+
+
+      const statusGrid =
+        document.getElementById("status-grid");
+
+      const filterBar =
+        document.getElementById("status-filters");
+
+      const preview =
+        document.getElementById("status-preview");
+
+      if (!statusGrid || !filterBar || !preview) {
+        return;
+      }
+
+
+      /* ---------------------------------
+         POMOĆNA FUNKCIJA
+         --------------------------------- */
+
+      function updateText(id, value) {
+        const element = document.getElementById(id);
+
+        if (element) {
+          element.textContent = value;
+        }
+      }
+
+
+      /* ---------------------------------
+         VIZUELNI PRIKAZ STATUSA
+         --------------------------------- */
+
+      function showStatus(code) {
+
+        const data = previewData[code];
+
+        if (!data) return;
+
+        const category = String(code)[0];
+
+        preview.dataset.category = category;
+
+        updateText("preview-symbol", data.symbol);
+        updateText("preview-heading", data.heading);
+        updateText("preview-message", data.message);
+
+        updateText(
+          "preview-address",
+          "https://example.com" + data.url
+        );
+
+        updateText(
+          "status-raw-response",
+          data.raw
+        );
+
+      }
+
+
+      /* ---------------------------------
+         IZBOR KODA
+         --------------------------------- */
+
+      statusGrid
+        .querySelectorAll("[data-status]")
+        .forEach(button => {
+
+          button.addEventListener("click", () => {
+
+            showStatus(
+              button.dataset.status
+            );
+
+          });
+
+        });
+
+
+      /* ---------------------------------
+         FILTERI
+         --------------------------------- */
+
+      function filterStatuses(category) {
+
+        filterBar
+          .querySelectorAll("[data-filter]")
+          .forEach(button => {
+
+            const active =
+              button.dataset.filter === category;
+
+            button.classList.toggle(
+              "active",
+              active
+            );
+
+            button.setAttribute(
+              "aria-pressed",
+              String(active)
+            );
+
+          });
+
+
+        statusGrid
+          .querySelectorAll(".status-group")
+          .forEach(group => {
+
+            const visible =
+              category === "all" ||
+              group.dataset.group === category;
+
+            group.classList.toggle(
+              "hidden",
+              !visible
+            );
+
+          });
+
+
+        /*
+         * Ako odabrani kod nije u prikazanoj
+         * kategoriji, izaberi prvi dostupan kod.
+         */
+
+        const activeButton = statusGrid.querySelector(
+          ".status-option.active"
+        );
+
+        if (
+          category !== "all" &&
+          activeButton &&
+          !activeButton.closest(
+            '.status-group[data-group="' + category + '"]'
+          )
+        ) {
+
+          const firstButton = statusGrid.querySelector(
+            '.status-group[data-group="' + category + '"] ' +
+            "[data-status]"
+          );
+
+          if (firstButton) {
+            firstButton.click();
+          }
+
+        }
+
+      }
+
+
+      filterBar
+        .querySelectorAll("[data-filter]")
+        .forEach(button => {
+
+          button.addEventListener("click", () => {
+
+            filterStatuses(
+              button.dataset.filter
+            );
+
+          });
+
+        });
+
+
+      /* ---------------------------------
+         POČETNI STATUS
+         --------------------------------- */
+
+      showStatus("200");
+
+    })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,916 @@
+
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#08090c">
+  <meta name="description" content="Interaktivna prezentacija o HTTP protokolu, web komunikaciji, metodama, statusnim kodovima i HTTPS-u.">
+
+  <title>HTTP Protokol | Interaktivna prezentacija</title>
+  <link rel="icon" type="image/png" href="./slike/ikonica.png">
+  
+
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* Dodatni stilovi početne stranice */
+
+    .home-main {
+      position: relative;
+      padding-bottom: 55px;
+    }
+
+    .home-hero {
+      padding: 35px 0 5px;
+    }
+
+    .home-title {
+      font-size: clamp(3rem, 6vw, 5.4rem);
+    }
+
+    .home-subtitle {
+      margin-top: 12px;
+    }
+
+    .hero-eyebrow {
+      margin-bottom: 12px;
+      color: var(--orange-light);
+      font-size: 0.73rem;
+      font-weight: 750;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .home-ambient-art {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0.75;
+    }
+
+    .orbit-stage {
+      height: calc(var(--orbit-size) + 140px);
+      margin-top: 0;
+      scroll-margin-top: 25px;
+    }
+
+    .orbit-node {
+      text-decoration: none;
+    }
+
+    .orbit-node::after {
+      content: "";
+      position: absolute;
+      inset: 5px;
+      border-radius: inherit;
+      border: 1px solid rgba(255,255,255,0.045);
+      pointer-events: none;
+    }
+
+    .orbit-node:hover .node-icon,
+    .orbit-node:focus-visible .node-icon {
+      filter: drop-shadow(
+        0 0 13px rgba(255,170,42,0.85)
+      );
+    }
+
+    .orbit-caption {
+      min-height: 24px;
+      margin: -3px auto 16px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.9rem;
+      letter-spacing: 0.3px;
+    }
+
+    .home-cta {
+      text-align: center;
+      margin-top: 0;
+    }
+
+    .home-cta .btn-primary {
+      min-width: 280px;
+    }
+
+    .secondary-link {
+      display: inline-block;
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+
+    .secondary-link:hover {
+      color: var(--orange-light);
+    }
+
+    .connection-core::before {
+      content: "";
+      position: absolute;
+      inset: -65px -85px;
+      z-index: -1;
+      border-radius: 50%;
+      background: radial-gradient(
+        ellipse,
+        rgba(255,121,0,0.085) 0%,
+        rgba(255,121,0,0.025) 46%,
+        transparent 72%
+      );
+      filter: blur(10px);
+    }
+
+    /* Dekorativne čestice */
+
+    .orbit-spark {
+      position: absolute;
+      z-index: 0;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #ffbd64;
+      box-shadow: 0 0 9px 2px rgba(255,155,30,0.6);
+      animation: spark-pulse 3s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes spark-pulse {
+      0%, 100% {
+        opacity: 0.3;
+        transform: scale(0.7);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.35);
+      }
+    }
+
+    /* Sekcija o projektu */
+
+    .about-section {
+      max-width: 900px;
+      margin: 115px auto 35px;
+      scroll-margin-top: 30px;
+    }
+
+    .about-panel {
+      padding: 35px;
+      text-align: center;
+    }
+
+    .about-panel h2 {
+      margin: 14px 0;
+      font-size: clamp(1.5rem,3vw,2.2rem);
+    }
+
+    .about-panel p {
+      max-width: 650px;
+      margin: auto;
+      color: var(--muted);
+    }
+
+    .about-tech {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .about-tech span {
+      padding: 7px 16px;
+      border-radius: 100px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255,121,0,0.055);
+      color: var(--orange-light);
+      font-size: 0.82rem;
+      font-weight: 650;
+    }
+
+    /* Mobilni prikaz */
+
+    @media (max-width: 760px) {
+      .home-hero {
+        padding: 40px 0 15px;
+      }
+
+      .home-title {
+        font-size: clamp(2.7rem,10vw,4.2rem);
+      }
+
+      .hero-eyebrow {
+        font-size: 0.65rem;
+        letter-spacing: 2px;
+      }
+
+      .orbit-stage {
+        height: auto;
+        margin-top: 25px;
+      }
+
+      .home-ambient-art,
+      .orbit-spark {
+        display: none;
+      }
+
+      .orbit-caption {
+        margin-top: 20px;
+      }
+
+      .home-cta .btn-primary {
+        width: min(100%,350px);
+        min-width: 0;
+      }
+
+      .about-section {
+        margin-top: 85px;
+      }
+
+      .about-panel {
+        padding: 26px 18px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .orbit-spark {
+        animation: none;
+      }
+    }
+  </style>
+
+  <script src="script.js" defer></script>
+</head>
+
+<body>
+
+  <!-- Globalna pozadina -->
+  <div id="site-background" aria-hidden="true"></div>
+
+  <!-- Navigacija iz script.js -->
+  <div id="site-header"></div>
+
+  <main class="page-shell home-main">
+
+    <!-- =====================================
+         HERO / NASLOV
+         ===================================== -->
+
+    <section class="home-hero fade-up"
+             aria-labelledby="home-title">
+
+      <p class="hero-eyebrow">
+        Web programiranje · Interaktivna prezentacija
+      </p>
+
+      <h1 class="home-title" id="home-title">
+        <span class="gradient-text">HTTP</span>
+        PROTOKOL
+      </h1>
+
+      <p class="home-subtitle">
+        Otkrij kako internet komunicira kroz
+        interaktivne demonstracije, animacije i eksperimente.
+      </p>
+
+    </section>
+
+    <!-- =====================================
+         SVG DEFINICIJE IKONICA
+         ===================================== -->
+
+    <svg xmlns="http://www.w3.org/2000/svg"
+         width="0" height="0"
+         style="position:absolute;overflow:hidden"
+         aria-hidden="true">
+
+      <symbol id="icon-book" viewBox="0 0 24 24">
+        <path d="M12 7c-3.2-2-6.5-2.4-10-1.6v14
+                 c3.5-.8 6.8-.4 10 1.6
+                 c3.2-2 6.5-2.4 10-1.6v-14
+                 c-3.5-.8-6.8-.4-10 1.6Z"/>
+        <path d="M12 7v14"/>
+      </symbol>
+
+      <symbol id="icon-globe" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M3 12h18"/>
+        <path d="M12 3c-5 5-5 13 0 18"/>
+        <path d="M12 3c5 5 5 13 0 18"/>
+      </symbol>
+
+      <symbol id="icon-flow" viewBox="0 0 24 24">
+        <path d="M4 7h15"/>
+        <path d="m15 3 4 4-4 4"/>
+        <path d="M20 17H5"/>
+        <path d="m9 13-4 4 4 4"/>
+      </symbol>
+
+      <symbol id="icon-file" viewBox="0 0 24 24">
+        <path d="M6 2h8l5 5v14
+                 a1 1 0 0 1-1 1H6
+                 a1 1 0 0 1-1-1V3
+                 a1 1 0 0 1 1-1Z"/>
+        <path d="M14 2v6h5"/>
+        <path d="M8 12h8M8 16h8"/>
+      </symbol>
+
+      <symbol id="icon-code" viewBox="0 0 24 24">
+        <path d="m8 5-7 7 7 7"/>
+        <path d="m16 5 7 7-7 7"/>
+        <path d="m14 3-4 18"/>
+      </symbol>
+
+      <symbol id="icon-status" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="18" height="5" rx="1.5"/>
+        <rect x="3" y="10" width="18" height="5" rx="1.5"/>
+        <rect x="3" y="17" width="18" height="5" rx="1.5"/>
+        <path d="M6 5.5h.1M6 12.5h.1M6 19.5h.1"/>
+      </symbol>
+
+      <symbol id="icon-shield" viewBox="0 0 24 24">
+        <path d="M12 2 21 6v6c0 6-4.1 9-9 10
+                 -4.9-1-9-4-9-10V6Z"/>
+        <path d="m8 12 3 3 5-6"/>
+      </symbol>
+
+      <symbol id="icon-chart" viewBox="0 0 24 24">
+        <path d="M3 21h18"/>
+        <rect x="5" y="13" width="3" height="8" rx="0.5"/>
+        <rect x="11" y="9" width="3" height="12" rx="0.5"/>
+        <rect x="17" y="4" width="3" height="17" rx="0.5"/>
+      </symbol>
+
+      <symbol id="icon-terminal" viewBox="0 0 24 24">
+        <rect x="2" y="3" width="20" height="18" rx="2"/>
+        <path d="m6 9 4 3-4 3"/>
+        <path d="M12 16h6"/>
+      </symbol>
+
+      <symbol id="icon-lightbulb" viewBox="0 0 24 24">
+        <path d="M9 18h6M10 21h4"/>
+        <path d="M8 15c-1.8-1.3-3-3.2-3-5.5
+                 a7 7 0 0 1 14 0
+                 c0 2.3-1.2 4.2-3 5.5
+                 -.8.6-1 1.2-1 3H9
+                 c0-1.8-.2-2.4-1-3Z"/>
+      </symbol>
+
+    </svg>
+
+    <!-- =====================================
+         ORBITALNA MAPA TEMA
+         ===================================== -->
+
+    <nav class="orbit-stage"
+         id="teme"
+         aria-label="Izbor tema prezentacije">
+
+      <!-- Pozadinske parametarske krive -->
+
+      <svg class="home-ambient-art"
+           viewBox="0 0 1400 600"
+           preserveAspectRatio="xMidYMid meet"
+           aria-hidden="true">
+
+        <defs>
+
+          <linearGradient id="parametricGradient"
+                          x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#ff7900"
+                  stop-opacity="0"/>
+            <stop offset="50%" stop-color="#ffa72e"
+                  stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="#e5c500"
+                  stop-opacity="0"/>
+          </linearGradient>
+
+          <radialGradient id="centralGlow">
+            <stop offset="0%" stop-color="#ff7900"
+                  stop-opacity="0.15"/>
+            <stop offset="100%" stop-color="#ff7900"
+                  stop-opacity="0"/>
+          </radialGradient>
+
+        </defs>
+
+        <circle cx="700" cy="300" r="310"
+                fill="url(#centralGlow)"/>
+
+        <!-- Leve parametarske linije -->
+
+        <g fill="none"
+           stroke="url(#parametricGradient)"
+           stroke-width="1.4">
+
+          <path d="M-180 30 C70 20 150 260 390 300"/>
+          <path d="M-180 65 C80 40 145 295 390 320"/>
+          <path d="M-180 100 C95 65 150 325 390 340"/>
+          <path d="M-180 135 C120 95 160 360 390 360"/>
+          <path d="M-180 170 C140 125 175 390 390 380"/>
+
+          <path d="M-140 560 C80 600 185 375 410 335"/>
+          <path d="M-140 525 C80 555 185 355 410 320"/>
+          <path d="M-140 490 C75 515 170 330 410 305"/>
+
+        </g>
+
+        <!-- Desne parametarske linije -->
+
+        <g fill="none"
+           stroke="url(#parametricGradient)"
+           stroke-width="1.4">
+
+          <path d="M1580 30 C1330 20 1250 260 1010 300"/>
+          <path d="M1580 65 C1320 40 1255 295 1010 320"/>
+          <path d="M1580 100 C1305 65 1250 325 1010 340"/>
+          <path d="M1580 135 C1280 95 1240 360 1010 360"/>
+          <path d="M1580 170 C1260 125 1225 390 1010 380"/>
+
+          <path d="M1540 560 C1320 600 1215 375 990 335"/>
+          <path d="M1540 525 C1320 555 1215 355 990 320"/>
+          <path d="M1540 490 C1325 515 1230 330 990 305"/>
+
+        </g>
+
+        <!-- Dekorativni kružni prstenovi -->
+
+        <circle cx="700" cy="300" r="315"
+                fill="none"
+                stroke="#ff9b24"
+                stroke-width="0.7"
+                stroke-opacity="0.12"/>
+
+        <circle cx="700" cy="300" r="355"
+                fill="none"
+                stroke="#ff9b24"
+                stroke-width="0.7"
+                stroke-opacity="0.08"/>
+
+      </svg>
+
+      <!-- Prava kružna orbitalna putanja -->
+
+      <div class="orbit-path" aria-hidden="true"></div>
+
+      <!-- Dekorativne čestice -->
+
+      <span class="orbit-spark"
+            style="left:19%;top:28%;"></span>
+
+      <span class="orbit-spark"
+            style="left:83%;top:26%;animation-delay:0.7s"></span>
+
+      <span class="orbit-spark"
+            style="left:16%;top:69%;animation-delay:1.3s"></span>
+
+      <span class="orbit-spark"
+            style="left:85%;top:74%;animation-delay:2s"></span>
+
+      <span class="orbit-spark"
+            style="left:48%;top:90%;animation-delay:0.4s"></span>
+
+      <!-- =====================================
+           CENTRALNA ILUSTRACIJA
+           ===================================== -->
+
+      <div class="connection-core"
+           role="img"
+           aria-label="Browser šalje HTTP zahtev serveru,
+                       a server vraća HTTP odgovor.">
+
+        <div class="connection-glow"></div>
+
+        <!-- Browser -->
+
+        <div class="browser-card">
+
+          <div class="browser-topbar">
+
+            <span class="browser-dot"></span>
+            <span class="browser-dot"></span>
+            <span class="browser-dot"></span>
+
+            <span class="browser-url">
+              &#128274; https://example.com
+            </span>
+
+          </div>
+
+          <div class="browser-content">
+
+            <div class="browser-image"></div>
+
+            <div class="browser-lines">
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Server -->
+
+        <div class="server-cloud"></div>
+
+        <div class="server-stack">
+
+          <div class="server-unit">
+            <div class="server-vents">
+              <span></span><span></span><span></span>
+              <span></span><span></span>
+            </div>
+            <span class="server-light"></span>
+          </div>
+
+          <div class="server-unit">
+            <div class="server-vents">
+              <span></span><span></span><span></span>
+              <span></span><span></span>
+            </div>
+            <span class="server-light"
+                  style="animation-delay:0.6s"></span>
+          </div>
+
+          <div class="server-unit">
+            <div class="server-vents">
+              <span></span><span></span><span></span>
+              <span></span><span></span>
+            </div>
+            <span class="server-light"
+                  style="animation-delay:1.2s"></span>
+          </div>
+
+        </div>
+
+        <!-- HTTP zahtev -->
+
+        <span class="flow-label request">
+          Request
+        </span>
+
+        <div class="traffic-line request">
+          <span class="traffic-particle"></span>
+        </div>
+
+        <!-- HTTP odgovor -->
+
+        <span class="flow-label response">
+          Response
+        </span>
+
+        <div class="traffic-line response">
+          <span class="traffic-particle"
+                style="animation-delay:1.2s"></span>
+        </div>
+
+      </div>
+
+      <!-- =====================================
+           KRUŽNA ORBITA — 10 TEMA
+           ===================================== -->
+
+      <div class="orbit-wheel">
+
+        <!-- 01 — UVOD -->
+
+        <a href="uvod.html"
+           class="orbit-node"
+           style="--angle:0deg;"
+           data-title="01 — Uvod"
+           aria-label="Otvori temu 1: Uvod">
+
+          <span class="orbit-face">
+
+            <span class="node-icon">
+              <svg viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor"
+                   stroke-width="1.8"
+                   stroke-linecap="round"
+                   stroke-linejoin="round">
+                <use href="#icon-book"></use>
+              </svg>
+            </span>
+
+            <span class="node-label">Uvod</span>
+
+          </span>
+        </a>
+
+        <!-- 02 — ŠTA JE HTTP? -->
+
+        <a href="sta_je_http.html"
+           class="orbit-node"
+           style="--angle:36deg;"
+           data-title="02 — Šta je HTTP?"
+           aria-label="Otvori temu 2: Šta je HTTP?">
+
+          <span class="orbit-face">
+
+            <span class="node-icon">
+              <svg viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor"
+                   stroke-width="1.8"
+                   stroke-linecap="round"
+                   stroke-linejoin="round">
+                <use href="#icon-globe"></use>
+              </svg>
+            </span>
+
+            <span class="node-label">Šta je HTTP?</span>
+
+          </span>
+        </a>
+
+        <!-- 03 — KAKO FUNKCIONIŠE? -->
+
+        <a href="kako_funkcionise.html"
+           class="orbit-node"
+           style="--angle:72deg;"
+           data-title="03 — Kako HTTP funkcioniše?"
+           aria-label="Otvori temu 3: Kako funkcioniše?">
+
+          <span class="orbit-face">
+
+            <span class="node-icon">
+              <svg viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor"
+                   stroke-width="1.8"
+                   stroke-linecap="round"
+                   stroke-linejoin="round">
+                <use href="#icon-flow"></use>
+              </svg>
+            </span>
+
+            <span class="node-label">
+              Kako funkcioniše?
+            </span>
+
+          </span>
+        </a>
+
+        <!-- 04 — HTTP PORUKA -->
+
+        <a href="http_poruka.html"
+           class="orbit-node"
+           style="--angle:108deg;"
+           data-title="04 — Struktura HTTP poruke"
+           aria-label="Otvori temu 4: HTTP poruka">
+
+          <span class="orbit-face">
+
+            <span class="node-icon">
+              <svg viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor"
+                   stroke-width="1.8"
+                   stroke-linecap="round"
+                   stroke-linejoin="round">
+                <use href="#icon-file"></use>
+              </svg>
+            </span>
+
+            <span class="node-label">HTTP poruka</span>
+
+          </span>
+        </a>
+
+        <!-- 05 — HTTP METODE -->
+
+        <a href="http_metode.html"
+           class="orbit-node"
+           style="--angle:144deg;"
+           data-title="05 — HTTP metode"
+           aria-label="Otvori temu 5: HTTP metode">
+
+          <span class="orbit-face">
+
+            <span class="node-icon">
+              <svg viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor"
+                   stroke-width="1.8"
+                   stroke-linecap="round"
+                   stroke-linejoin="round">
+                <use href="#icon-code"></use>
+              </svg>
+            </span>
+
+            <span class="node-label">Metode</span>
+
+          </span>
+        </a>
+
+        <!-- 06 — STATUSNI KODOVI -->
+
+        <a href="statusni_kodovi.html"
+           class="orbit-node"
+           style="--angle:180deg;"
+           data-title="06 — HTTP statusni kodovi"
+           aria-label="Otvori temu 6: Statusni kodovi">
+
+          <span class="orbit-face">
+
+            <span class="node-icon">
+              <svg viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor"
+                   stroke-width="1.8"
+                   stroke-linecap="round"
+                   stroke-linejoin="round">
+                <use href="#icon-status"></use>
+              </svg>
+            </span>
+
+            <span class="node-label">
+              Statusni kodovi
+            </span>
+
+          </span>
+        </a>
+
+        <!-- 07 — HTTP I HTTPS -->
+
+        <a href="http_https.html"
+           class="orbit-node"
+           style="--angle:216deg;"
+           data-title="07 — HTTP i HTTPS"
+           aria-label="Otvori temu 7: HTTP i HTTPS">
+
+          <span class="orbit-face">
+
+            <span class="node-icon">
+              <svg viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor"
+                   stroke-width="1.8"
+                   stroke-linecap="round"
+                   stroke-linejoin="round">
+                <use href="#icon-shield"></use>
+              </svg>
+            </span>
+
+            <span class="node-label">
+              HTTP i HTTPS
+            </span>
+
+          </span>
+        </a>
+
+        <!-- 08 — EVOLUCIJA -->
+
+        <a href="evolucija.html"
+           class="orbit-node"
+           style="--angle:252deg;"
+           data-title="08 — Evolucija HTTP protokola"
+           aria-label="Otvori temu 8: Evolucija HTTP-a">
+
+          <span class="orbit-face">
+
+            <span class="node-icon">
+              <svg viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor"
+                   stroke-width="1.8"
+                   stroke-linecap="round"
+                   stroke-linejoin="round">
+                <use href="#icon-chart"></use>
+              </svg>
+            </span>
+
+            <span class="node-label">Evolucija</span>
+
+          </span>
+        </a>
+
+        <!-- 09 — HTTP U PRAKSI -->
+
+        <a href="http_u_praksi.html"
+           class="orbit-node"
+           style="--angle:288deg;"
+           data-title="09 — HTTP u praksi"
+           aria-label="Otvori temu 9: HTTP u praksi">
+
+          <span class="orbit-face">
+
+            <span class="node-icon">
+              <svg viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor"
+                   stroke-width="1.8"
+                   stroke-linecap="round"
+                   stroke-linejoin="round">
+                <use href="#icon-terminal"></use>
+              </svg>
+            </span>
+
+            <span class="node-label">
+              HTTP u praksi
+            </span>
+
+          </span>
+        </a>
+
+        <!-- 10 — KVIZ -->
+
+        <a href="kviz.html"
+           class="orbit-node"
+           style="--angle:324deg;"
+           data-title="10 — Kviz i zaključak"
+           aria-label="Otvori temu 10: Kviz">
+
+          <span class="orbit-face">
+
+            <span class="node-icon">
+              <svg viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor"
+                   stroke-width="1.8"
+                   stroke-linecap="round"
+                   stroke-linejoin="round">
+                <use href="#icon-lightbulb"></use>
+              </svg>
+            </span>
+
+            <span class="node-label">Kviz</span>
+
+          </span>
+        </a>
+
+      </div>
+
+    </nav>
+
+    <!-- =====================================
+         POZIV NA AKCIJU
+         ===================================== -->
+
+    <p class="orbit-caption"
+       id="orbit-caption"
+       aria-live="polite">
+      Izaberi temu za istraživanje
+    </p>
+
+    <div class="home-cta">
+
+      <a href="uvod.html"
+         class="btn btn-primary btn-large">
+        Započni prezentaciju
+        <span aria-hidden="true">→</span>
+      </a>
+
+      <div>
+        <a href="#teme" class="secondary-link">
+          Ili izaberi neku od 10 tema
+        </a>
+      </div>
+
+    </div>
+
+    <!-- =====================================
+         O PROJEKTU
+         ===================================== -->
+
+    <section class="about-section"
+             id="o-projektu"
+             aria-labelledby="about-title">
+
+      <div class="glass-card about-panel">
+
+        <span class="section-label">
+          O projektu
+        </span>
+
+        <h2 id="about-title">
+          Internet počinje
+          <span class="gradient-text">
+            komunikacijom.
+          </span>
+        </h2>
+
+        <p>
+          Ovaj edukativni web sajt istražuje HTTP protokol
+          kroz animacije, praktične primere i interaktivne
+          demonstracije. Saznaj kako browser i server
+          razmenjuju podatke i kako funkcioniše
+          savremeni web.
+        </p>
+
+        <div class="about-tech">
+          <span>HTML5</span>
+          <span>CSS3</span>
+          <span>JavaScript</span>
+          <span>HTTP / HTTPS</span>
+          <span>GitHub Pages</span>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Footer iz script.js -->
+  <div id="site-footer"></div>
+
+</body>
+</html>

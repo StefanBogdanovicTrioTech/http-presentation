@@ -1,0 +1,1558 @@
+
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#08090c">
+
+  <meta name="description"
+        content="Završni interaktivni kviz iz HTTP protokola. Proveri znanje o HTTP metodama, statusnim kodovima i HTTPS-u.">
+
+  <title>Kviz | HTTP Protokol</title>
+  <link rel="icon" type="image/png" href="./slike/ikonica.png">
+  
+
+  <link rel="stylesheet" href="style.css">
+
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+
+    /* =====================================
+       01 — HERO
+       ===================================== */
+
+    .quiz-hero {
+      display: grid;
+      grid-template-columns: 1fr 0.9fr;
+      gap: 50px;
+      align-items: center;
+      min-height: 390px;
+      margin-bottom: 65px;
+    }
+
+    .quiz-hero h1 {
+      margin: 18px 0 23px;
+      font-size: clamp(2.8rem, 5vw, 5.1rem);
+      line-height: 1.12;
+      font-weight: 900;
+      letter-spacing: -2px;
+    }
+
+    .quiz-hero p {
+      max-width: 580px;
+      color: var(--muted);
+      font-size: 1.1rem;
+      line-height: 1.85;
+    }
+
+    .quiz-hero strong {
+      color: var(--white);
+    }
+
+    .quiz-hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 11px;
+      margin-top: 27px;
+    }
+
+    .quiz-hero-tag {
+      padding: 9px 16px;
+      border: 1px solid var(--glass-border);
+      border-radius: 99px;
+      background: rgba(255,121,0,0.065);
+      color: var(--gold-light);
+      font: 750 0.84rem Consolas,monospace;
+    }
+
+    /* =====================================
+       02 — HERO ILUSTRACIJA
+       ===================================== */
+
+    .quiz-hero-visual {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: 350px;
+      isolation: isolate;
+    }
+
+    .quiz-hero-visual::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        rgba(255,121,0,0.15),
+        rgba(229,197,0,0.035) 43%,
+        transparent 75%
+      );
+      filter: blur(18px);
+    }
+
+    .quiz-hero-visual svg {
+      width: min(100%, 430px);
+      height: auto;
+      overflow: visible;
+      filter: drop-shadow(
+        0 0 28px rgba(255,121,0,0.12)
+      );
+    }
+
+    .quiz-orbit-ring {
+      transform-origin: 200px 175px;
+      animation: quiz-orbit-turn 40s linear infinite;
+    }
+
+    @keyframes quiz-orbit-turn {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* =====================================
+       03 — NASLOVI SEKCIJA
+       ===================================== */
+
+    .section-heading {
+      text-align: center;
+      margin-bottom: 33px;
+    }
+
+    .section-heading h2 {
+      margin: 13px 0;
+      font-size: clamp(1.9rem,3.2vw,2.8rem);
+      line-height: 1.25;
+    }
+
+    .section-heading p {
+      max-width: 730px;
+      margin: auto;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    /* =====================================
+       04 — GLAVNI KVIZ
+       ===================================== */
+
+    .quiz-section {
+      margin-top: 35px;
+    }
+
+    #quiz-app {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      border: 1px solid rgba(255,175,50,0.29);
+      border-radius: 29px;
+      padding: 30px;
+      background: rgba(15,17,23,0.87);
+      backdrop-filter: blur(24px);
+      box-shadow:
+        0 25px 75px rgba(0,0,0,0.35),
+        0 0 50px rgba(255,121,0,0.055);
+    }
+
+    #quiz-app::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      top: -240px;
+      right: -220px;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: rgba(255,121,0,0.11);
+      filter: blur(75px);
+      pointer-events: none;
+    }
+
+    .quiz-panel-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      padding-bottom: 23px;
+      margin-bottom: 26px;
+      border-bottom: 1px solid rgba(255,255,255,0.09);
+    }
+
+    .quiz-panel-heading h3 {
+      font-size: 1.38rem;
+      margin-bottom: 6px;
+    }
+
+    .quiz-panel-heading p {
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .quiz-live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 15px;
+      border: 1px solid var(--glass-border);
+      border-radius: 99px;
+      background: rgba(255,121,0,0.07);
+      color: var(--gold-light);
+      font-size: 0.77rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .quiz-live-badge::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--orange-light);
+      box-shadow: 0 0 12px var(--orange);
+    }
+
+    /* =====================================
+       05 — RASPORED
+       ===================================== */
+
+    .quiz-main-layout {
+      display: grid;
+      grid-template-columns: minmax(0,1.65fr) minmax(230px,0.75fr);
+      gap: 26px;
+    }
+
+    .quiz-question-area {
+      min-width: 0;
+    }
+
+    .quiz-side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 19px;
+      padding: 23px;
+      border-radius: 19px;
+      border: 1px solid rgba(255,171,49,0.18);
+      background:
+        radial-gradient(
+          ellipse at top,
+          rgba(255,121,0,0.085),
+          transparent 70%
+        ),
+        #0c0e13;
+    }
+
+    .side-panel-title {
+      color: var(--orange-light);
+      font-weight: 850;
+      letter-spacing: 1.2px;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+    }
+
+    .side-circle {
+      display: grid;
+      place-items: center;
+      width: 115px;
+      height: 115px;
+      margin: 7px auto;
+      border: 2px solid rgba(255,173,49,0.38);
+      border-radius: 50%;
+      box-shadow:
+        0 0 28px rgba(255,121,0,0.10),
+        inset 0 0 24px rgba(255,121,0,0.05);
+      background: rgba(255,121,0,0.035);
+    }
+
+    .side-circle span {
+      font: 900 2.3rem Consolas,monospace;
+      background: var(--gradient);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .side-panel-text {
+      color: var(--muted);
+      font-size: 0.87rem;
+      line-height: 1.8;
+      text-align: center;
+    }
+
+    .quiz-tips {
+      display: grid;
+      gap: 13px;
+      margin-top: 7px;
+    }
+
+    .quiz-tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      color: var(--muted);
+      font-size: 0.83rem;
+      line-height: 1.6;
+    }
+
+    .quiz-tip-icon {
+      display: grid;
+      place-items: center;
+      flex: 0 0 28px;
+      width: 28px;
+      height: 28px;
+      border-radius: 9px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255,121,0,0.07);
+      color: var(--orange-light);
+      font: 800 0.86rem Consolas,monospace;
+    }
+
+    /* =====================================
+       06 — NAPREDAK
+       ===================================== */
+
+    .quiz-progress-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .quiz-progress-header strong {
+      color: var(--orange-light);
+      font: 850 0.93rem Consolas,monospace;
+    }
+
+    .quiz-progress-header span:last-child {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    #quiz-app .quiz-progress {
+      height: 9px;
+      width: 100%;
+      border-radius: 99px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.09);
+      border: 1px solid rgba(255,255,255,0.045);
+    }
+
+    #quiz-app .quiz-progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: var(--gradient);
+      box-shadow: 0 0 16px rgba(255,121,0,0.5);
+      transition: width 0.4s ease;
+    }
+
+    /* =====================================
+       07 — PITANJE
+       ===================================== */
+
+    .quiz-question-block {
+      padding: 30px 0 10px;
+    }
+
+    .question-eyebrow {
+      display: block;
+      margin-bottom: 12px;
+      color: var(--orange-light);
+      font-size: 0.73rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    #quiz-app .quiz-question {
+      min-height: 90px;
+      margin: 0;
+      font-size: clamp(1.4rem,2.5vw,2rem);
+      font-weight: 800;
+      line-height: 1.38;
+      letter-spacing: -0.4px;
+    }
+
+    /* =====================================
+       08 — ODGOVORI
+       ===================================== */
+
+    #quiz-app .quiz-options {
+      display: grid;
+      gap: 12px;
+      margin: 20px 0 0;
+      padding: 0;
+      counter-reset: answer-index;
+    }
+
+    #quiz-app .quiz-option {
+      counter-increment: answer-index;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      min-height: 65px;
+      gap: 16px;
+      padding: 14px 19px;
+      border-radius: 15px;
+      border: 1px solid rgba(255,255,255,0.13);
+      background: rgba(255,255,255,0.035);
+      color: var(--white);
+      text-align: left;
+      font-size: 0.96rem;
+      font-weight: 600;
+      line-height: 1.6;
+      cursor: pointer;
+      transition:
+        transform 0.2s,
+        border-color 0.2s,
+        background 0.2s,
+        box-shadow 0.2s;
+    }
+
+    #quiz-app .quiz-option::before {
+      content: counter(answer-index, upper-alpha);
+      display: grid;
+      place-items: center;
+      flex: 0 0 35px;
+      width: 35px;
+      height: 35px;
+      border-radius: 11px;
+      background: rgba(255,121,0,0.09);
+      border: 1px solid rgba(255,171,49,0.22);
+      color: var(--orange-light);
+      font: 850 0.9rem Consolas,monospace;
+    }
+
+    #quiz-app .quiz-option:hover:not(:disabled) {
+      transform: translateX(4px);
+      border-color: rgba(255,171,49,0.60);
+      background: rgba(255,121,0,0.09);
+    }
+
+    #quiz-app .quiz-option:focus-visible {
+      outline: 2px solid var(--orange-light);
+      outline-offset: 3px;
+    }
+
+    #quiz-app .quiz-option.correct {
+      border-color: rgba(57,217,138,0.65);
+      background: rgba(57,217,138,0.10);
+      color: #e2ffed;
+      box-shadow: inset 3px 0 0 var(--success);
+    }
+
+    #quiz-app .quiz-option.correct::before {
+      background: rgba(57,217,138,0.16);
+      border-color: rgba(57,217,138,0.42);
+      color: var(--success);
+    }
+
+    #quiz-app .quiz-option.incorrect {
+      border-color: rgba(255,98,107,0.62);
+      background: rgba(255,98,107,0.11);
+      color: #ffe0e2;
+      box-shadow: inset 3px 0 0 var(--danger);
+    }
+
+    #quiz-app .quiz-option.incorrect::before {
+      background: rgba(255,98,107,0.15);
+      border-color: rgba(255,98,107,0.42);
+      color: var(--danger);
+    }
+
+    #quiz-app .quiz-option:disabled {
+      cursor: default;
+    }
+
+    /* =====================================
+       09 — POVRATNA INFORMACIJA
+       ===================================== */
+
+    #quiz-app .quiz-feedback {
+      min-height: 25px;
+      margin-top: 21px;
+      color: var(--gold-light);
+      font-size: 0.94rem;
+      line-height: 1.75;
+    }
+
+    .quiz-action-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 18px;
+      padding-top: 24px;
+      margin-top: 19px;
+      border-top: 1px solid rgba(255,255,255,0.09);
+    }
+
+    .quiz-action-row p {
+      max-width: 365px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.7;
+    }
+
+    #quiz-next {
+      min-width: 190px;
+    }
+
+    /* =====================================
+       10 — ZAVRŠNI REZULTAT
+       ===================================== */
+
+    #quiz-app .quiz-result {
+      max-width: 850px;
+      margin: 0 auto;
+      padding: 25px 12px 15px;
+      text-align: center;
+    }
+
+    .result-eyebrow {
+      display: block;
+      color: var(--orange-light);
+      font-size: 0.78rem;
+      font-weight: 850;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .score-circle {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      width: 235px;
+      height: 235px;
+      margin: 28px auto;
+      border-radius: 50%;
+      background:
+        radial-gradient(
+          circle at center,
+          #15171c 57%,
+          transparent 59%
+        ),
+        conic-gradient(
+          #ff7900,
+          #ffb839,
+          #e5c500,
+          #ff7900
+        );
+      box-shadow: 0 0 60px rgba(255,121,0,0.16);
+    }
+
+    .score-circle::after {
+      content: "";
+      position: absolute;
+      inset: -15px;
+      border: 1px dashed rgba(255,171,49,0.32);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    #quiz-score {
+      font: 900 clamp(2.6rem,5vw,4rem) Consolas,monospace;
+      color: var(--white);
+      letter-spacing: -2px;
+    }
+
+    .score-label {
+      color: var(--orange-light);
+      font-size: 0.75rem;
+      font-weight: 850;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .result-heading {
+      font-size: clamp(1.9rem,3.5vw,2.9rem);
+      margin: 33px 0 16px;
+    }
+
+    .result-description {
+      max-width: 625px;
+      margin: auto;
+      color: var(--muted);
+      font-size: 1.02rem;
+      line-height: 1.85;
+    }
+
+    .result-buttons {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 13px;
+      margin-top: 30px;
+    }
+
+    .result-buttons .btn {
+      min-width: 195px;
+    }
+
+    /* =====================================
+       11 — ZAVRŠNI PREGLED ZNANJA
+       ===================================== */
+
+    .recap-section {
+      margin-top: 95px;
+    }
+
+    .recap-grid {
+      display: grid;
+      grid-template-columns: repeat(3,minmax(0,1fr));
+      gap: 20px;
+    }
+
+    .recap-card {
+      min-height: 230px;
+    }
+
+    .recap-icon {
+      display: grid;
+      place-items: center;
+      width: 58px;
+      height: 58px;
+      margin-bottom: 21px;
+      border-radius: 17px;
+      background: rgba(255,121,0,0.09);
+      border: 1px solid var(--glass-border);
+      color: var(--orange-light);
+      font: 900 1.06rem Consolas,monospace;
+    }
+
+    .recap-card h3 {
+      margin-bottom: 12px;
+      font-size: 1.16rem;
+    }
+
+    .recap-card p {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.8;
+    }
+
+    /* =====================================
+       12 — ZAVRŠNI PANEL
+       ===================================== */
+
+    .final-section {
+      margin-top: 95px;
+    }
+
+    .final-panel {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      text-align: center;
+      padding: 55px 35px;
+      border: 1px solid rgba(255,171,49,0.27);
+      border-radius: 29px;
+      background:
+        radial-gradient(
+          ellipse at top,
+          rgba(255,121,0,0.12),
+          transparent 70%
+        ),
+        rgba(18,20,25,0.85);
+      box-shadow: 0 25px 65px rgba(0,0,0,0.25);
+    }
+
+    .final-panel::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      width: 540px;
+      height: 250px;
+      top: -195px;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 1px solid rgba(255,171,49,0.35);
+      border-radius: 50%;
+      box-shadow:
+        0 0 0 35px rgba(255,121,0,0.015),
+        0 0 0 70px rgba(255,121,0,0.012);
+    }
+
+    .final-panel h2 {
+      margin: 15px 0 20px;
+      font-size: clamp(1.9rem,3.4vw,3rem);
+      line-height: 1.25;
+    }
+
+    .final-panel p {
+      max-width: 760px;
+      margin: auto;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.85;
+    }
+
+    .final-panel .btn {
+      margin-top: 30px;
+    }
+
+    /* =====================================
+       13 — RESPONSIVE
+       ===================================== */
+
+    @media (max-width: 1000px) {
+
+      .quiz-hero {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        text-align: center;
+      }
+
+      .quiz-hero p {
+        margin-inline: auto;
+      }
+
+      .quiz-hero-tags {
+        justify-content: center;
+      }
+
+      .quiz-hero-visual {
+        min-height: 280px;
+      }
+
+      .quiz-hero-visual svg {
+        max-width: 340px;
+      }
+
+      .quiz-main-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .quiz-side-panel {
+        display: none;
+      }
+    }
+
+    @media (max-width: 750px) {
+
+      .recap-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .recap-card {
+        min-height: 0;
+      }
+
+      #quiz-app {
+        padding: 19px;
+        border-radius: 21px;
+      }
+
+      #quiz-app .quiz-question {
+        min-height: 0;
+      }
+
+      #quiz-app .quiz-option {
+        min-height: 60px;
+        padding: 13px 12px;
+        gap: 12px;
+        font-size: 0.88rem;
+      }
+
+      #quiz-app .quiz-option::before {
+        flex-basis: 31px;
+        width: 31px;
+        height: 31px;
+      }
+
+      .quiz-action-row .btn {
+        width: 100%;
+      }
+
+      .final-panel {
+        padding: 38px 20px;
+      }
+
+      .recap-section,
+      .final-section {
+        margin-top: 65px;
+      }
+    }
+
+    @media (max-width: 480px) {
+
+      .quiz-hero h1 {
+        letter-spacing: -1px;
+      }
+
+      .quiz-hero-visual svg {
+        max-width: 285px;
+      }
+
+      .quiz-panel-heading h3 {
+        font-size: 1.15rem;
+      }
+
+      .quiz-progress-header {
+        font-size: 0.84rem;
+      }
+
+      .score-circle {
+        width: 205px;
+        height: 205px;
+      }
+
+      .result-buttons .btn {
+        width: 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      .quiz-orbit-ring {
+        animation: none;
+      }
+
+      #quiz-app .quiz-progress-fill,
+      #quiz-app .quiz-option {
+        transition: none;
+      }
+    }
+
+  </style>
+
+  <script src="script.js" defer></script>
+</head>
+
+<body>
+
+  <!-- GLOBALNA POZADINA I HEADER -->
+
+  <div id="site-background" aria-hidden="true"></div>
+  <div id="site-header"></div>
+
+  <main class="page-shell lesson-page">
+
+    <!-- ===================================
+         01 — HERO
+         =================================== -->
+
+    <section class="quiz-hero"
+             aria-labelledby="quiz-page-title">
+
+      <div class="fade-up">
+
+        <span class="section-label">
+          10 / 10 — Završni izazov
+        </span>
+
+        <h1 id="quiz-page-title">
+          Koliko dobro
+          <span class="gradient-text">poznaješ HTTP?</span>
+        </h1>
+
+        <p>
+          Prošli smo put od prvog HTTP zahteva
+          do moderne HTTPS komunikacije.
+
+          Sada je vreme da proveriš
+          <strong>koliko si naučio.</strong>
+
+          Odgovori na pet pitanja i saznaj svoj rezultat.
+        </p>
+
+        <div class="quiz-hero-tags">
+
+          <span class="quiz-hero-tag">
+            5 pitanja
+          </span>
+
+          <span class="quiz-hero-tag">
+            Interaktivni odgovori
+          </span>
+
+          <span class="quiz-hero-tag">
+            Završni rezultat
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================
+           SVG ORBITALNA ILUSTRACIJA
+           ================================= -->
+
+      <div class="quiz-hero-visual">
+
+        <svg viewBox="0 0 400 350"
+             xmlns="http://www.w3.org/2000/svg"
+             aria-hidden="true">
+
+          <defs>
+
+            <linearGradient id="quiz-glow-gradient"
+                            x1="0" y1="0" x2="1" y2="1">
+
+              <stop offset="0%"
+                    stop-color="#ff7900"/>
+
+              <stop offset="55%"
+                    stop-color="#ffb334"/>
+
+              <stop offset="100%"
+                    stop-color="#e5c500"/>
+
+            </linearGradient>
+
+            <radialGradient id="quiz-center-glow">
+
+              <stop offset="0%"
+                    stop-color="#ff7900"
+                    stop-opacity="0.24"/>
+
+              <stop offset="100%"
+                    stop-color="#ff7900"
+                    stop-opacity="0"/>
+
+            </radialGradient>
+
+          </defs>
+
+          <!-- Centralni sjaj -->
+
+          <circle cx="200" cy="175"
+                  r="150"
+                  fill="url(#quiz-center-glow)"/>
+
+          <!-- Spoljašnje putanje -->
+
+          <g class="quiz-orbit-ring"
+             fill="none">
+
+            <ellipse cx="200" cy="175"
+                     rx="170" ry="112"
+                     transform="rotate(-25 200 175)"
+                     stroke="#ff9d2b"
+                     stroke-width="1.2"
+                     stroke-opacity="0.42"/>
+
+            <ellipse cx="200" cy="175"
+                     rx="170" ry="112"
+                     transform="rotate(25 200 175)"
+                     stroke="#e5c500"
+                     stroke-width="1"
+                     stroke-opacity="0.3"/>
+
+            <circle cx="200" cy="175"
+                    r="132"
+                    stroke="#ffac32"
+                    stroke-width="1"
+                    stroke-opacity="0.15"
+                    stroke-dasharray="4 9"/>
+
+          </g>
+
+          <!-- Veze sa centralnim čvorom -->
+
+          <g stroke="#ffac32"
+             stroke-opacity="0.25"
+             stroke-width="1.2">
+
+            <path d="M200 175 65 105"/>
+            <path d="M200 175 335 100"/>
+            <path d="M200 175 342 254"/>
+            <path d="M200 175 65 263"/>
+            <path d="M200 175 200 24"/>
+
+          </g>
+
+          <!-- Centralni krug -->
+
+          <circle cx="200" cy="175"
+                  r="84"
+                  fill="#17191e"
+                  stroke="url(#quiz-glow-gradient)"
+                  stroke-width="2.5"/>
+
+          <circle cx="200" cy="175"
+                  r="71"
+                  fill="#0e1015"
+                  stroke="#ffb642"
+                  stroke-opacity="0.17"/>
+
+          <text x="200" y="204"
+                text-anchor="middle"
+                font-size="91"
+                font-family="Arial, sans-serif"
+                font-weight="700"
+                fill="url(#quiz-glow-gradient)">
+            ?
+          </text>
+
+
+          <!-- HTTP -->
+
+          <g>
+            <rect x="21" y="85"
+                  width="88" height="40"
+                  rx="14"
+                  fill="#1d1e22"
+                  stroke="#ffac32"
+                  stroke-opacity="0.6"/>
+
+            <text x="65" y="110"
+                  text-anchor="middle"
+                  fill="#ffbc58"
+                  font-family="Consolas, monospace"
+                  font-size="16"
+                  font-weight="700">
+              HTTP
+            </text>
+          </g>
+
+
+          <!-- 200 -->
+
+          <g>
+            <rect x="291" y="80"
+                  width="88" height="40"
+                  rx="14"
+                  fill="#1d1e22"
+                  stroke="#ffac32"
+                  stroke-opacity="0.6"/>
+
+            <text x="335" y="105"
+                  text-anchor="middle"
+                  fill="#ffbc58"
+                  font-family="Consolas, monospace"
+                  font-size="16"
+                  font-weight="700">
+              200
+            </text>
+          </g>
+
+
+          <!-- TLS -->
+
+          <g>
+            <rect x="295" y="235"
+                  width="88" height="40"
+                  rx="14"
+                  fill="#1d1e22"
+                  stroke="#ffac32"
+                  stroke-opacity="0.6"/>
+
+            <text x="339" y="260"
+                  text-anchor="middle"
+                  fill="#ffbc58"
+                  font-family="Consolas, monospace"
+                  font-size="16"
+                  font-weight="700">
+              TLS
+            </text>
+          </g>
+
+
+          <!-- GET -->
+
+          <g>
+            <rect x="22" y="245"
+                  width="88" height="40"
+                  rx="14"
+                  fill="#1d1e22"
+                  stroke="#ffac32"
+                  stroke-opacity="0.6"/>
+
+            <text x="66" y="270"
+                  text-anchor="middle"
+                  fill="#ffbc58"
+                  font-family="Consolas, monospace"
+                  font-size="16"
+                  font-weight="700">
+              GET
+            </text>
+          </g>
+
+
+          <!-- QUIC -->
+
+          <g>
+            <rect x="155" y="5"
+                  width="90" height="40"
+                  rx="14"
+                  fill="#1d1e22"
+                  stroke="#ffac32"
+                  stroke-opacity="0.6"/>
+
+            <text x="200" y="30"
+                  text-anchor="middle"
+                  fill="#ffbc58"
+                  font-family="Consolas, monospace"
+                  font-size="16"
+                  font-weight="700">
+              QUIC
+            </text>
+          </g>
+
+        </svg>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================
+         02 — KVIZ
+         =================================== -->
+
+    <section class="quiz-section"
+             aria-labelledby="quiz-section-title">
+
+      <div class="section-heading">
+
+        <span class="section-label">
+          Interaktivna provera znanja
+        </span>
+
+        <h2 id="quiz-section-title">
+          HTTP Knowledge
+          <span class="gradient-text">Challenge.</span>
+        </h2>
+
+        <p>
+          Za svako pitanje izaberi jedan odgovor.
+          Nakon izbora videćeš da li je tačan,
+          a na kraju dobijaš konačan rezultat.
+        </p>
+
+      </div>
+
+
+      <!--
+        Zajednički script.js automatski
+        aktivira kviz kada postoji #quiz-app.
+      -->
+
+      <div id="quiz-app">
+
+        <!-- ZAGLAVLJE KVIZA -->
+
+        <div class="quiz-panel-heading">
+
+          <div>
+
+            <h3>
+              HTTP Quiz Console
+            </h3>
+
+            <p>
+              Završna provera razumevanja protokola
+            </p>
+
+          </div>
+
+          <span class="quiz-live-badge">
+            KNOWLEDGE CHECK
+          </span>
+
+        </div>
+
+
+        <!-- =================================
+             SADRŽAJ PITANJA
+             ================================= -->
+
+        <div id="quiz-content">
+
+          <div class="quiz-main-layout">
+
+            <!-- LEVA STRANA: PITANJA -->
+
+            <div class="quiz-question-area">
+
+              <!-- NAPREDAK -->
+
+              <div class="quiz-progress-header">
+
+                <strong id="quiz-counter"
+                        aria-live="polite">
+                  Pitanje 1 od 5
+                </strong>
+
+                <span>
+                  Završni kviz
+                </span>
+
+              </div>
+
+
+              <div class="quiz-progress"
+                   role="progressbar"
+                   aria-label="Napredak kroz kviz">
+
+                <div class="quiz-progress-fill"
+                     id="quiz-progress-fill">
+                </div>
+
+              </div>
+
+
+              <!-- PITANJE -->
+
+              <div class="quiz-question-block">
+
+                <span class="question-eyebrow">
+                  Izaberi tačan odgovor
+                </span>
+
+                <h2 class="quiz-question"
+                    id="quiz-question"
+                    aria-live="polite"
+                    aria-atomic="true">
+
+                  Učitavanje pitanja...
+
+                </h2>
+
+              </div>
+
+
+              <!-- ODGOVORI KOJE GENERIŠE JS -->
+
+              <div class="quiz-options"
+                   id="quiz-options"
+                   aria-label="Ponuđeni odgovori">
+
+              </div>
+
+
+              <!-- OBJAŠNJENJE ODGOVORA -->
+
+              <div class="quiz-feedback"
+                   id="quiz-feedback"
+                   role="status"
+                   aria-live="polite">
+
+              </div>
+
+
+              <!-- DUGME ZA NASTAVAK -->
+
+              <div class="quiz-action-row">
+
+                <p>
+                  Pažljivo pročitaj ponuđene odgovore.
+                  Kada izabereš odgovor, moći ćeš
+                  da pređeš na sledeće pitanje.
+                </p>
+
+                <button type="button"
+                        class="btn btn-primary"
+                        id="quiz-next">
+
+                  Sledeće pitanje →
+
+                </button>
+
+              </div>
+
+            </div>
+
+
+            <!-- DESNA STRANA: INSTRUKCIJE -->
+
+            <aside class="quiz-side-panel">
+
+              <span class="side-panel-title">
+                Završni test
+              </span>
+
+              <div class="side-circle">
+                <span>5</span>
+              </div>
+
+              <p class="side-panel-text">
+                Pet pitanja koja proveravaju
+                razumevanje osnovnih pojmova
+                HTTP komunikacije.
+              </p>
+
+              <div class="quiz-tips">
+
+                <div class="quiz-tip">
+
+                  <span class="quiz-tip-icon">
+                    01
+                  </span>
+
+                  <span>
+                    Pročitaj pitanje i ponuđene odgovore.
+                  </span>
+
+                </div>
+
+
+                <div class="quiz-tip">
+
+                  <span class="quiz-tip-icon">
+                    02
+                  </span>
+
+                  <span>
+                    Klikni na odgovor koji smatraš tačnim.
+                  </span>
+
+                </div>
+
+
+                <div class="quiz-tip">
+
+                  <span class="quiz-tip-icon">
+                    03
+                  </span>
+
+                  <span>
+                    Proveri rezultat i pređi na sledeće pitanje.
+                  </span>
+
+                </div>
+
+
+                <div class="quiz-tip">
+
+                  <span class="quiz-tip-icon">
+                    04
+                  </span>
+
+                  <span>
+                    Na kraju pregledaj svoj ukupan rezultat.
+                  </span>
+
+                </div>
+
+              </div>
+
+            </aside>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================
+             ZAVRŠNI REZULTAT
+             ================================= -->
+
+        <div id="quiz-result"
+             class="quiz-result hidden"
+             aria-live="polite">
+
+          <span class="result-eyebrow">
+            Kviz je završen
+          </span>
+
+
+          <!-- KRUŽNI PRIKAZ REZULTATA -->
+
+          <div class="score-circle">
+
+            <span id="quiz-score">
+              0 / 5
+            </span>
+
+            <span class="score-label">
+              TAČNI ODGOVORI
+            </span>
+
+          </div>
+
+
+          <h2 class="result-heading">
+            Završio si
+            <span class="gradient-text">
+              HTTP izazov!
+            </span>
+          </h2>
+
+          <p class="result-description">
+            Ovaj rezultat pokazuje koliko si
+            uspešno odgovorio na pet pitanja.
+
+            Ako želiš da proveriš znanje ponovo,
+            možeš odmah da ponoviš kviz ili da
+            se vratiš na neku od prethodnih lekcija.
+          </p>
+
+
+          <div class="result-buttons">
+
+            <button type="button"
+                    class="btn btn-primary btn-large"
+                    id="quiz-restart">
+
+              ↻ Ponovi kviz
+
+            </button>
+
+
+            <a href="index.html"
+               class="btn btn-secondary btn-large">
+
+              ← Početna stranica
+
+            </a>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================
+         03 — PREGLED NAUČENOG
+         =================================== -->
+
+    <section class="recap-section"
+             aria-labelledby="recap-title">
+
+      <div class="section-heading">
+
+        <span class="section-label">
+          Pregled gradiva
+        </span>
+
+        <h2 id="recap-title">
+          Šta smo
+          <span class="gradient-text">naučili?</span>
+        </h2>
+
+        <p>
+          Najvažnije ideje iz naše prezentacije
+          mogu se svesti na tri oblasti.
+        </p>
+
+      </div>
+
+
+      <div class="recap-grid">
+
+        <article class="glass-card recap-card">
+
+          <div class="recap-icon">
+            ⇄
+          </div>
+
+          <h3>HTTP komunikacija</h3>
+
+          <p>
+            Browser šalje zahtev, a server vraća
+            odgovor. HTTP određuje strukturu
+            i značenje te razmene.
+          </p>
+
+        </article>
+
+
+        <article class="glass-card recap-card">
+
+          <div class="recap-icon">
+            200
+          </div>
+
+          <h3>Metode i statusi</h3>
+
+          <p>
+            HTTP metode opisuju tražene operacije,
+            a statusni kodovi pokazuju
+            rezultat njihove obrade.
+          </p>
+
+        </article>
+
+
+        <article class="glass-card recap-card">
+
+          <div class="recap-icon">
+            TLS
+          </div>
+
+          <h3>Bezbednost i razvoj</h3>
+
+          <p>
+            HTTPS štiti HTTP komunikaciju pomoću
+            TLS-a, dok novije verzije HTTP-a
+            poboljšavaju efikasnost prenosa.
+          </p>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================
+         04 — ZAVRŠNA PORUKA
+         =================================== -->
+
+    <section class="final-section"
+             aria-labelledby="final-title">
+
+      <div class="final-panel">
+
+        <span class="section-label">
+          Kraj prezentacije
+        </span>
+
+        <h2 id="final-title">
+          Iza svake web stranice
+          <span class="gradient-text">
+            stoji komunikacija.
+          </span>
+        </h2>
+
+        <p>
+          Svaki put kada otvoriš sajt, preuzmeš sliku,
+          pošalješ formular ili koristiš web aplikaciju,
+          HTTP omogućava razmenu informacija
+          između klijenta i servera.
+
+          Razumevanje HTTP-a jedan je od važnih
+          koraka ka razumevanju web programiranja.
+        </p>
+
+        <a href="index.html"
+           class="btn btn-primary btn-large">
+
+          Povratak na sve teme →
+
+        </a>
+
+      </div>
+
+    </section>
+
+
+    <!-- NAVIGACIJA -->
+
+    <div id="lesson-navigation"></div>
+
+  </main>
+
+  <div id="site-footer"></div>
+
+</body>
+</html>
